@@ -1,0 +1,11 @@
+node_modules
+.env
+*.log
+.DS_Store
+
+# Build & TS incremental
+dist
+*.tsbuildinfo
+
+# Test coverage (vitest)
+coverage

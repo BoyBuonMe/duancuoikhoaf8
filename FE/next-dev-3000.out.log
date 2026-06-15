@@ -1,0 +1,17 @@
+
+> ecommerce-fe@0.1.0 dev
+> next dev -p 3000
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.137.1:3000
+- Environments: .env
+✓ Ready in 554ms
+Creating turbopack project {
+  dir: 'C:\\Users\\Chris\\Desktop\\Bussiness\\Learning\\Back End\\E-commerce\\FE',
+  testMode: true
+}
+
+✓ Compiled in 380ms
+✓ Compiled in 119ms
+[?25h

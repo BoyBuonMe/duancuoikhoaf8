@@ -1,0 +1,80 @@
+{"name":"Women","slug":"women","level":0,"parentSlug":null,"path":"Women","pathSegments":["Women"],"productCount":411}
+{"name":"Men","slug":"men","level":0,"parentSlug":null,"path":"Men","pathSegments":["Men"],"productCount":189}
+{"name":"Accessories","slug":"accessories","level":0,"parentSlug":null,"path":"Accessories","pathSegments":["Accessories"],"productCount":25}
+{"name":"Trending","slug":"women-trending","level":1,"parentSlug":"women","path":"Women > Trending","pathSegments":["Women","Trending"],"productCount":411}
+{"name":"Leggings","slug":"women-leggings","level":1,"parentSlug":"women","path":"Women > Leggings","pathSegments":["Women","Leggings"],"productCount":99}
+{"name":"Products","slug":"women-products","level":1,"parentSlug":"women","path":"Women > Products","pathSegments":["Women","Products"],"productCount":411}
+{"name":"Accessories","slug":"women-accessories","level":1,"parentSlug":"women","path":"Women > Accessories","pathSegments":["Women","Accessories"],"productCount":10}
+{"name":"Last Chance","slug":"women-last-chance","level":1,"parentSlug":"women","path":"Women > Last Chance","pathSegments":["Women","Last Chance"],"productCount":411}
+{"name":"Explore","slug":"women-explore","level":1,"parentSlug":"women","path":"Women > Explore","pathSegments":["Women","Explore"],"productCount":411}
+{"name":"Trending","slug":"men-trending","level":1,"parentSlug":"men","path":"Men > Trending","pathSegments":["Men","Trending"],"productCount":189}
+{"name":"T-Shirts & Tops","slug":"men-tshirts-tops","level":1,"parentSlug":"men","path":"Men > T-Shirts & Tops","pathSegments":["Men","T-Shirts & Tops"],"productCount":189}
+{"name":"Products","slug":"men-products","level":1,"parentSlug":"men","path":"Men > Products","pathSegments":["Men","Products"],"productCount":189}
+{"name":"Accessories","slug":"men-accessories","level":1,"parentSlug":"men","path":"Men > Accessories","pathSegments":["Men","Accessories"],"productCount":0}
+{"name":"Last Chance","slug":"men-last-chance","level":1,"parentSlug":"men","path":"Men > Last Chance","pathSegments":["Men","Last Chance"],"productCount":189}
+{"name":"Explore","slug":"men-explore","level":1,"parentSlug":"men","path":"Men > Explore","pathSegments":["Men","Explore"],"productCount":189}
+{"name":"Trending","slug":"accessories-trending","level":1,"parentSlug":"accessories","path":"Accessories > Trending","pathSegments":["Accessories","Trending"],"productCount":25}
+{"name":"Bags","slug":"accessories-bags","level":1,"parentSlug":"accessories","path":"Accessories > Bags","pathSegments":["Accessories","Bags"],"productCount":25}
+{"name":"Equipment","slug":"accessories-equipment","level":1,"parentSlug":"accessories","path":"Accessories > Equipment","pathSegments":["Accessories","Equipment"],"productCount":25}
+{"name":"Socks","slug":"accessories-socks","level":1,"parentSlug":"accessories","path":"Accessories > Socks","pathSegments":["Accessories","Socks"],"productCount":25}
+{"name":"Underwear","slug":"accessories-underwear","level":1,"parentSlug":"accessories","path":"Accessories > Underwear","pathSegments":["Accessories","Underwear"],"productCount":25}
+{"name":"Headwear","slug":"accessories-headwear","level":1,"parentSlug":"accessories","path":"Accessories > Headwear","pathSegments":["Accessories","Headwear"],"productCount":25}
+{"name":"Last Chance","slug":"accessories-last-chance","level":1,"parentSlug":"accessories","path":"Accessories > Last Chance","pathSegments":["Accessories","Last Chance"],"productCount":25}
+{"name":"New Product Drops","slug":"women-trending-new-drops","level":2,"parentSlug":"women-trending","path":"Women > Trending > New Product Drops","pathSegments":["Women","Trending","New Product Drops"],"productCount":15}
+{"name":"Best Sellers","slug":"women-trending-best-sellers","level":2,"parentSlug":"women-trending","path":"Women > Trending > Best Sellers","pathSegments":["Women","Trending","Best Sellers"],"productCount":19}
+{"name":"Form | Now Live","slug":"women-trending-form-now-live","level":2,"parentSlug":"women-trending","path":"Women > Trending > Form Now Live","pathSegments":["Women","Trending","Form Now Live"],"productCount":10}
+{"name":"Everyday Seamless","slug":"women-trending-everyday-seamless","level":2,"parentSlug":"women-trending","path":"Women > Trending > Everyday Seamless","pathSegments":["Women","Trending","Everyday Seamless"],"productCount":12}
+{"name":"Spring Looks","slug":"women-trending-spring-looks","level":2,"parentSlug":"women-trending","path":"Women > Trending > Spring Looks","pathSegments":["Women","Trending","Spring Looks"],"productCount":12}
+{"name":"Pilates","slug":"women-trending-pilates","level":2,"parentSlug":"women-trending","path":"Women > Trending > Pilates","pathSegments":["Women","Trending","Pilates"],"productCount":10}
+{"name":"All Leggings","slug":"women-leggings-all","level":2,"parentSlug":"women-leggings","path":"Women > Leggings > All Leggings","pathSegments":["Women","Leggings","All Leggings"],"productCount":99}
+{"name":"High Waisted","slug":"women-leggings-high-waisted","level":2,"parentSlug":"women-leggings","path":"Women > Leggings > High Waisted","pathSegments":["Women","Leggings","High Waisted"],"productCount":20}
+{"name":"Seamless Leggings","slug":"women-leggings-seamless","level":2,"parentSlug":"women-leggings","path":"Women > Leggings > Seamless Leggings","pathSegments":["Women","Leggings","Seamless Leggings"],"productCount":18}
+{"name":"Leggings With Pockets","slug":"women-leggings-with-pockets","level":2,"parentSlug":"women-leggings","path":"Women > Leggings > Leggings With Pockets","pathSegments":["Women","Leggings","Leggings With Pockets"],"productCount":10}
+{"name":"Tall Leggings","slug":"women-leggings-tall","level":2,"parentSlug":"women-leggings","path":"Women > Leggings > Tall Leggings","pathSegments":["Women","Leggings","Tall Leggings"],"productCount":15}
+{"name":"All Products","slug":"women-products-all","level":2,"parentSlug":"women-products","path":"Women > Products > All Products","pathSegments":["Women","Products","All Products"],"productCount":411}
+{"name":"Sports Bras","slug":"women-products-sports-bras","level":2,"parentSlug":"women-products","path":"Women > Products > Sports Bras","pathSegments":["Women","Products","Sports Bras"],"productCount":106}
+{"name":"Shorts","slug":"women-products-shorts","level":2,"parentSlug":"women-products","path":"Women > Products > Shorts","pathSegments":["Women","Products","Shorts"],"productCount":65}
+{"name":"Pullovers","slug":"women-products-pullovers","level":2,"parentSlug":"women-products","path":"Women > Products > Pullovers","pathSegments":["Women","Products","Pullovers"],"productCount":4}
+{"name":"SS Tops","slug":"women-products-ss-tops","level":2,"parentSlug":"women-products","path":"Women > Products > SS Tops","pathSegments":["Women","Products","SS Tops"],"productCount":33}
+{"name":"All Accessories","slug":"women-accessories-all","level":2,"parentSlug":"women-accessories","path":"Women > Accessories > All Accessories","pathSegments":["Women","Accessories","All Accessories"],"productCount":10}
+{"name":"All Socks","slug":"women-accessories-all-socks","level":2,"parentSlug":"women-accessories","path":"Women > Accessories > All Socks","pathSegments":["Women","Accessories","All Socks"],"productCount":10}
+{"name":"For Less","slug":"women-last-chance-for-less","level":2,"parentSlug":"women-last-chance","path":"Women > Last Chance > For Less","pathSegments":["Women","Last Chance","For Less"],"productCount":12}
+{"name":"Leggings Guide","slug":"women-explore-leggings-guide","level":2,"parentSlug":"women-explore","path":"Women > Explore > Leggings Guide","pathSegments":["Women","Explore","Leggings Guide"],"productCount":411}
+{"name":"Sports Bra Guide","slug":"women-explore-sports-bra-guide","level":2,"parentSlug":"women-explore","path":"Women > Explore > Sports Bra Guide","pathSegments":["Women","Explore","Sports Bra Guide"],"productCount":411}
+{"name":"Running Guide","slug":"women-explore-running-guide","level":2,"parentSlug":"women-explore","path":"Women > Explore > Running Guide","pathSegments":["Women","Explore","Running Guide"],"productCount":411}
+{"name":"New to Gymshark?","slug":"women-explore-new-to-gymshark","level":2,"parentSlug":"women-explore","path":"Women > Explore > New to Gymshark","pathSegments":["Women","Explore","New to Gymshark"],"productCount":10}
+{"name":"New Product Drops","slug":"men-trending-new-drops","level":2,"parentSlug":"men-trending","path":"Men > Trending > New Product Drops","pathSegments":["Men","Trending","New Product Drops"],"productCount":12}
+{"name":"Best Sellers","slug":"men-trending-best-sellers","level":2,"parentSlug":"men-trending","path":"Men > Trending > Best Sellers","pathSegments":["Men","Trending","Best Sellers"],"productCount":12}
+{"name":"Shorts","slug":"men-trending-shorts","level":2,"parentSlug":"men-trending","path":"Men > Trending > Shorts","pathSegments":["Men","Trending","Shorts"],"productCount":45}
+{"name":"Running","slug":"men-trending-running","level":2,"parentSlug":"men-trending","path":"Men > Trending > Running","pathSegments":["Men","Trending","Running"],"productCount":12}
+{"name":"T-Shirts & Tops","slug":"men-tshirts-tops-all","level":2,"parentSlug":"men-tshirts-tops","path":"Men > T-Shirts & Tops > T-Shirts & Tops","pathSegments":["Men","T-Shirts & Tops","T-Shirts & Tops"],"productCount":189}
+{"name":"Tank Tops","slug":"men-tshirts-tops-tanks","level":2,"parentSlug":"men-tshirts-tops","path":"Men > T-Shirts & Tops > Tank Tops","pathSegments":["Men","T-Shirts & Tops","Tank Tops"],"productCount":37}
+{"name":"Oversized T-Shirts","slug":"men-tshirts-tops-oversized","level":2,"parentSlug":"men-tshirts-tops","path":"Men > T-Shirts & Tops > Oversized T-Shirts","pathSegments":["Men","T-Shirts & Tops","Oversized T-Shirts"],"productCount":9}
+{"name":"Long Sleeve Tops","slug":"men-tshirts-tops-long-sleeve","level":2,"parentSlug":"men-tshirts-tops","path":"Men > T-Shirts & Tops > Long Sleeve Tops","pathSegments":["Men","T-Shirts & Tops","Long Sleeve Tops"],"productCount":11}
+{"name":"All Products","slug":"men-products-all","level":2,"parentSlug":"men-products","path":"Men > Products > All Products","pathSegments":["Men","Products","All Products"],"productCount":189}
+{"name":"Shorts","slug":"men-products-shorts","level":2,"parentSlug":"men-products","path":"Men > Products > Shorts","pathSegments":["Men","Products","Shorts"],"productCount":45}
+{"name":"Joggers","slug":"men-products-joggers","level":2,"parentSlug":"men-products","path":"Men > Products > Joggers","pathSegments":["Men","Products","Joggers"],"productCount":15}
+{"name":"Pullovers","slug":"men-products-pullovers","level":2,"parentSlug":"men-products","path":"Men > Products > Pullovers","pathSegments":["Men","Products","Pullovers"],"productCount":8}
+{"name":"All Accessories","slug":"men-accessories-all","level":2,"parentSlug":"men-accessories","path":"Men > Accessories > All Accessories","pathSegments":["Men","Accessories","All Accessories"],"productCount":0}
+{"name":"All Socks","slug":"men-accessories-all-socks","level":2,"parentSlug":"men-accessories","path":"Men > Accessories > All Socks","pathSegments":["Men","Accessories","All Socks"],"productCount":0}
+{"name":"For Less","slug":"men-last-chance-for-less","level":2,"parentSlug":"men-last-chance","path":"Men > Last Chance > For Less","pathSegments":["Men","Last Chance","For Less"],"productCount":10}
+{"name":"Shorts Guide","slug":"men-explore-shorts-guide","level":2,"parentSlug":"men-explore","path":"Men > Explore > Shorts Guide","pathSegments":["Men","Explore","Shorts Guide"],"productCount":189}
+{"name":"Running Guide","slug":"men-explore-running-guide","level":2,"parentSlug":"men-explore","path":"Men > Explore > Running Guide","pathSegments":["Men","Explore","Running Guide"],"productCount":189}
+{"name":"All Accessories","slug":"accessories-trending-all","level":2,"parentSlug":"accessories-trending","path":"Accessories > Trending > All Accessories","pathSegments":["Accessories","Trending","All Accessories"],"productCount":25}
+{"name":"New Product Drops","slug":"accessories-trending-new-drops","level":2,"parentSlug":"accessories-trending","path":"Accessories > Trending > New Product Drops","pathSegments":["Accessories","Trending","New Product Drops"],"productCount":6}
+{"name":"Best Sellers","slug":"accessories-trending-best-sellers","level":2,"parentSlug":"accessories-trending","path":"Accessories > Trending > Best Sellers","pathSegments":["Accessories","Trending","Best Sellers"],"productCount":14}
+{"name":"Seasonal Accessories","slug":"accessories-trending-seasonal","level":2,"parentSlug":"accessories-trending","path":"Accessories > Trending > Seasonal Accessories","pathSegments":["Accessories","Trending","Seasonal Accessories"],"productCount":1}
+{"name":"All Bags","slug":"accessories-bags-all","level":2,"parentSlug":"accessories-bags","path":"Accessories > Bags > All Bags","pathSegments":["Accessories","Bags","All Bags"],"productCount":25}
+{"name":"Backpacks","slug":"accessories-bags-backpacks","level":2,"parentSlug":"accessories-bags","path":"Accessories > Bags > Backpacks","pathSegments":["Accessories","Bags","Backpacks"],"productCount":2}
+{"name":"Holdalls","slug":"accessories-bags-holdalls","level":2,"parentSlug":"accessories-bags","path":"Accessories > Bags > Holdalls","pathSegments":["Accessories","Bags","Holdalls"],"productCount":5}
+{"name":"All Equipment","slug":"accessories-equipment-all","level":2,"parentSlug":"accessories-equipment","path":"Accessories > Equipment > All Equipment","pathSegments":["Accessories","Equipment","All Equipment"],"productCount":25}
+{"name":"Lifting Straps","slug":"accessories-equipment-lifting-straps","level":2,"parentSlug":"accessories-equipment","path":"Accessories > Equipment > Lifting Straps","pathSegments":["Accessories","Equipment","Lifting Straps"],"productCount":0}
+{"name":"Lifting Belts","slug":"accessories-equipment-lifting-belts","level":2,"parentSlug":"accessories-equipment","path":"Accessories > Equipment > Lifting Belts","pathSegments":["Accessories","Equipment","Lifting Belts"],"productCount":0}
+{"name":"All Socks","slug":"accessories-socks-all","level":2,"parentSlug":"accessories-socks","path":"Accessories > Socks > All Socks","pathSegments":["Accessories","Socks","All Socks"],"productCount":25}
+{"name":"Crew Socks","slug":"accessories-socks-crew","level":2,"parentSlug":"accessories-socks","path":"Accessories > Socks > Crew Socks","pathSegments":["Accessories","Socks","Crew Socks"],"productCount":10}
+{"name":"Ankle Socks","slug":"accessories-socks-ankle","level":2,"parentSlug":"accessories-socks","path":"Accessories > Socks > Ankle Socks","pathSegments":["Accessories","Socks","Ankle Socks"],"productCount":6}
+{"name":"Men's Underwear & Basics","slug":"accessories-underwear-mens","level":2,"parentSlug":"accessories-underwear","path":"Accessories > Underwear > Men's Underwear & Basics","pathSegments":["Accessories","Underwear","Men's Underwear & Basics"],"productCount":0}
+{"name":"All Headwear","slug":"accessories-headwear-all","level":2,"parentSlug":"accessories-headwear","path":"Accessories > Headwear > All Headwear","pathSegments":["Accessories","Headwear","All Headwear"],"productCount":25}
+{"name":"Caps","slug":"accessories-headwear-caps","level":2,"parentSlug":"accessories-headwear","path":"Accessories > Headwear > Caps","pathSegments":["Accessories","Headwear","Caps"],"productCount":2}
+{"name":"Headbands","slug":"accessories-headwear-headbands","level":2,"parentSlug":"accessories-headwear","path":"Accessories > Headwear > Headbands","pathSegments":["Accessories","Headwear","Headbands"],"productCount":5}
+{"name":"Accessories For Less","slug":"accessories-last-chance-for-less","level":2,"parentSlug":"accessories-last-chance","path":"Accessories > Last Chance > Accessories For Less","pathSegments":["Accessories","Last Chance","Accessories For Less"],"productCount":6}

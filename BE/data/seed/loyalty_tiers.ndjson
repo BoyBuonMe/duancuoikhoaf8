@@ -1,0 +1,3 @@
+{"tier":"tier_1","name":"Starter","minPoints":0,"maxPoints":499,"benefits":["Birthday reward","Email early access"],"isActive":true}
+{"tier":"tier_2","name":"Core","minPoints":500,"maxPoints":1499,"benefits":["10% member discount days","Priority support","Birthday reward"],"isActive":true}
+{"tier":"tier_3","name":"Elite","minPoints":1500,"maxPoints":999999,"benefits":["15% member discount days","Exclusive drop access","Priority support","Birthday reward"],"isActive":true}

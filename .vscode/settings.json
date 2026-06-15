@@ -1,0 +1,13 @@
+{
+  "typescript.tsdk": "FE/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsconfig": "FE/tsconfig.json",
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "css.lint.unknownAtRules": "ignore",
+  "tailwindCSS.experimental.configFile": "FE/src/app/globals.css",
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "cSpell.words": ["GYMSHARK"]
+}

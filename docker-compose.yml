@@ -1,0 +1,103 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: ecommerce-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-supersecret123}
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "-u",
+          "${MONGO_USER:-admin}",
+          "-p",
+          "${MONGO_PASSWORD:-supersecret123}",
+          "--authenticationDatabase",
+          "admin",
+          "--eval",
+          "db.adminCommand('ping')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  backend:
+    build:
+      context: ./BE
+      dockerfile: Dockerfile
+    container_name: ecommerce-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      MONGODB_URL: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-supersecret123}@mongo:27017/?authSource=admin
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-e-commerce}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+      API_ORIGIN: ${API_ORIGIN:-http://localhost:3001}
+      JWT_SECRET: ${JWT_SECRET:-change-me-access-secret}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh-secret}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_SECURE: ${SMTP_SECURE:-true}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      VNPAY_TMN_CODE: ${VNPAY_TMN_CODE:-}
+      VNPAY_HASH_SECRET: ${VNPAY_HASH_SECRET:-}
+      VNPAY_RETURN_URL: ${VNPAY_RETURN_URL:-http://localhost:3001/api/payments/vnpay/return}
+      VNPAY_IPN_URL: ${VNPAY_IPN_URL:-http://localhost:3001/api/payments/vnpay/ipn}
+      MOMO_REDIRECT_URL: ${MOMO_REDIRECT_URL:-http://localhost:3001/api/payments/momo/return}
+    ports:
+      - "3001:3001"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./FE
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_API: ${NEXT_PUBLIC_BASE_API:-http://localhost:3001/api}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+        NEXT_PUBLIC_ADMIN_DASHBOARD_URL: ${NEXT_PUBLIC_ADMIN_DASHBOARD_URL:-http://localhost:3000/admin}
+        NEXT_PUBLIC_HOME_BRATZ_HERO_VIDEO_DESKTOP_URL: ${NEXT_PUBLIC_HOME_BRATZ_HERO_VIDEO_DESKTOP_URL:-}
+        NEXT_PUBLIC_HOME_BRATZ_HERO_VIDEO_MOBILE_URL: ${NEXT_PUBLIC_HOME_BRATZ_HERO_VIDEO_MOBILE_URL:-}
+        NEXT_PUBLIC_HOME_BRATZ_HERO_POSTER_URL: ${NEXT_PUBLIC_HOME_BRATZ_HERO_POSTER_URL:-}
+        NEXT_PUBLIC_HOME_PREMIUM_HERO_VIDEO_DESKTOP_URL: ${NEXT_PUBLIC_HOME_PREMIUM_HERO_VIDEO_DESKTOP_URL:-}
+        NEXT_PUBLIC_HOME_PREMIUM_HERO_VIDEO_MOBILE_URL: ${NEXT_PUBLIC_HOME_PREMIUM_HERO_VIDEO_MOBILE_URL:-}
+        NEXT_PUBLIC_HOME_PREMIUM_HERO_POSTER_URL: ${NEXT_PUBLIC_HOME_PREMIUM_HERO_POSTER_URL:-}
+    container_name: ecommerce-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+volumes:
+  mongo_data:
+    name: ecommerce_mongodb_data
+
+networks:
+  app-network:
+    driver: bridge

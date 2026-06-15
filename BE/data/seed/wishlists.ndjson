@@ -1,0 +1,4 @@
+{"userEmail":"nam.dev@example.com","items":[{"sku":"A1-TSHIRT-BLK-M","addedAt":"2026-05-25T09:15:00.000Z"},{"sku":"B1-LEGGING-RED-M","addedAt":"2026-05-25T09:18:00.000Z"},{"sku":"C2-BAG-BLK-ONE","addedAt":"2026-05-25T09:20:00.000Z"}],"updatedAt":"2026-05-25T09:20:00.000Z"}
+{"userEmail":"linh.nguyen@example.com","items":[{"sku":"A3-HOODIE-RED-M","addedAt":"2026-05-24T13:30:00.000Z"},{"sku":"B2-BRA-WHT-M","addedAt":"2026-05-24T13:33:00.000Z"}],"updatedAt":"2026-05-24T13:33:00.000Z"}
+{"userEmail":"huy.tran@example.com","items":[{"sku":"A2-JOGGER-BLK-L","addedAt":"2026-05-23T20:05:00.000Z"},{"sku":"C1-SOCKS-WHT-ONE","addedAt":"2026-05-23T20:07:00.000Z"},{"sku":"A1-TSHIRT-YLW-M","addedAt":"2026-05-23T20:10:00.000Z"}],"updatedAt":"2026-05-23T20:10:00.000Z"}
+{"userEmail":"mai.vo@example.com","items":[{"sku":"B1-LEGGING-WHT-M","addedAt":"2026-05-22T11:45:00.000Z"},{"sku":"B2-BRA-YLW-S","addedAt":"2026-05-22T11:46:00.000Z"}],"updatedAt":"2026-05-22T11:46:00.000Z"}

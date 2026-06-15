@@ -1,0 +1,6 @@
+{
+  "typescript.tsconfig": "tsconfig.json",
+  "css.lint.unknownAtRules": "ignore",
+  "tailwindCSS.experimental.configFile": "src/app/globals.css",
+  "cSpell.words": ["GYMSHARK"]
+}
