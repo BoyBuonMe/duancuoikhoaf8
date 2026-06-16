@@ -3,6 +3,7 @@
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import type { ReactNode } from "react";
 import { ScrollToTopOnNavigate } from "@/components/layout";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 import { ThemeProvider } from "@/components/theme";
 import { StoreProvider } from "@/store/StoreProvider";
 import { ToastProvider } from "@/shared/context/ToastContext";
@@ -15,6 +16,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <ToastProvider>
           <ScrollToTopOnNavigate />
           {children}
+          <ChatWidget />
         </ToastProvider>
       </ThemeProvider>
     </StoreProvider>
