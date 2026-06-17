@@ -135,8 +135,22 @@ async function issueEmailVerification(user: {
   return { verificationToken, verificationUrl };
 }
 
-function authUser(user: { id: string; email: string; name?: string }) {
-  return { id: user.id, email: user.email, name: user.name };
+function authUser(user: {
+  id: string;
+  email: string;
+  name?: string;
+  role?: "user" | "admin" | "boss";
+  status?: "active" | "blocked";
+  emailVerified?: boolean;
+}) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    status: user.status,
+    emailVerified: user.emailVerified,
+  };
 }
 
 export async function register(
@@ -189,6 +203,10 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       throw httpError("Invalid credentials", 401);
     }
 
+    if (user.status === "blocked") {
+      throw httpError("Account is blocked", 403);
+    }
+
     if (!user.emailVerified) {
       throw httpError(
         "Please verify your email before logging in",
@@ -197,7 +215,11 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       );
     }
 
-    const token = await issueTokens(res, { sub: user.id, email: user.email });
+    const token = await issueTokens(res, {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
     res.json({
       token,
       user: authUser(user),
@@ -262,7 +284,15 @@ export async function google(req: Request, res: Response, next: NextFunction) {
 
     if (!user) throw httpError("Unable to sign in with Google", 500);
 
-    const token = await issueTokens(res, { sub: user.id, email: user.email });
+    if (user.status === "blocked") {
+      throw httpError("Account is blocked", 403);
+    }
+
+    const token = await issueTokens(res, {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
     res.json({ token, user: authUser(user) });
   } catch (e) {
     next(e);
@@ -302,9 +332,16 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
     }
 
     // Rotation: issue hoàn toàn token mới
+    const user = await User.findById(payload.sub).select("email role status");
+    if (!user || user.status === "blocked") {
+      res.clearCookie(REFRESH_COOKIE, refreshCookieOptions());
+      throw httpError("Unauthorized", 401);
+    }
+
     const accessToken = await issueTokens(res, {
       sub: payload.sub,
-      email: payload.email,
+      email: user.email,
+      role: user.role,
     });
     res.json({ token: accessToken });
   } catch (e) {

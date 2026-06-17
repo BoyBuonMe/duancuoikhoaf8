@@ -42,7 +42,7 @@ const priceSchema = z.object({
 export const adminListProductsQuerySchema = z.object({
   search: z.string().trim().optional(),
   category: z.string().trim().optional(),
-  limit: z.coerce.number().int().positive().max(100).optional().default(20),
+  limit: z.coerce.number().int().positive().max(1000).optional().default(20),
   skip: z.coerce.number().int().nonnegative().optional().default(0),
 });
 
