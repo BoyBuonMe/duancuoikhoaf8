@@ -69,7 +69,6 @@ router.get(
 
 router.get(
   "/products",
-  requireBoss,
   validate(adminListProductsQuerySchema, "query"),
   adminController.listProducts,
 );
@@ -81,7 +80,6 @@ router.post(
 );
 router.get(
   "/products/:id",
-  requireBoss,
   validate(adminIdParamsSchema, "params"),
   adminController.getProduct,
 );

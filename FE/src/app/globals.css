@@ -273,3 +273,222 @@ html.dark {
   animation: toast-fade-out 0.3s ease-out forwards;
 }
 
+@keyframes adminShellEnter {
+    from {
+        opacity: 0;
+        transform: translateX(-18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes adminHeaderEnter {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes adminContentEnter {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes adminNavEnter {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.admin-shell-enter {
+    animation: adminShellEnter 420ms ease-out both;
+}
+
+.admin-header-enter {
+    animation: adminHeaderEnter 360ms ease-out both;
+}
+
+.admin-content-enter {
+    animation: adminContentEnter 320ms ease-out both;
+}
+
+.admin-nav-item {
+    animation: adminNavEnter 260ms ease-out both;
+}
+
+.dashboard-card {
+    border: 1px solid rgb(226 232 240 / 0.9);
+    border-radius: 18px;
+    background: rgb(255 255 255 / 0.96);
+    box-shadow: 0 18px 55px rgb(15 23 42 / 0.06);
+}
+
+.dashboard-card-enter {
+    animation: adminContentEnter 360ms ease-out both;
+}
+
+.form-input {
+    height: 42px;
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgb(226 232 240);
+    background: white;
+    color: rgb(15 23 42);
+    padding: 0 12px;
+    font-size: 14px;
+    outline: none;
+    transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.form-input:focus {
+    border-color: rgb(196 181 253);
+    box-shadow: 0 0 0 4px rgb(237 233 254);
+}
+
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.92) translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.animate-page-in {
+    animation: pageIn 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-card-in {
+    animation: cardIn 440ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-up {
+    animation: fadeUp 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+    animation: fadeIn 300ms ease both;
+}
+
+.animate-slide-left {
+    animation: slideInLeft 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-pop-in {
+    animation: popIn 380ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.delay-50 {
+    animation-delay: 50ms;
+}
+
+.delay-75 {
+    animation-delay: 75ms;
+}
+
+.delay-100 {
+    animation-delay: 100ms;
+}
+
+.delay-150 {
+    animation-delay: 150ms;
+}
+
+.delay-200 {
+    animation-delay: 200ms;
+}
+
+.delay-250 {
+    animation-delay: 250ms;
+}
+
+.delay-300 {
+    animation-delay: 300ms;
+}
+
+.delay-350 {
+    animation-delay: 350ms;
+}
+
+.delay-400 {
+    animation-delay: 400ms;
+}
+
+.delay-500 {
+    animation-delay: 500ms;
+}
+
