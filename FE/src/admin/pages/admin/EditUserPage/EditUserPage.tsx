@@ -32,8 +32,8 @@ const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 const STATUS_LABELS: Record<UserStatus, string> = {
-  active: "Hoat dong",
-  blocked: "Bi khoa",
+  active: "Hoạt động",
+  blocked: "Bị khóa",
 };
 
 export default function EditUserPage({ user, onBack }: Props) {
@@ -103,9 +103,9 @@ export default function EditUserPage({ user, onBack }: Props) {
 
       <form
         onSubmit={handleSubmit(submitForm)}
-        className="bg-white rounded-2xl border border-gray-100 shadow-sm max-w-2xl p-6 animate-card-in delay-150"
+        className="w-full rounded-lg border border-gray-100 bg-white p-4 shadow-sm animate-card-in delay-150 sm:p-6"
       >
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Họ tên
@@ -191,7 +191,7 @@ export default function EditUserPage({ user, onBack }: Props) {
           </p>
         )}
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={onBack}

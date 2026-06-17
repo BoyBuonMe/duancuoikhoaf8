@@ -20,8 +20,8 @@ const ROLE_COLORS: Record<UserRole, string> = {
 };
 
 const STATUS_LABELS: Record<UserStatus, string> = {
-  active: "Hoat dong",
-  blocked: "Bi khoa",
+  active: "Hoạt động",
+  blocked: "Bị khóa",
 };
 
 const STATUS_COLORS: Record<UserStatus, string> = {
@@ -58,7 +58,7 @@ export default function UserDetailPage({ user, onBack }: Props) {
         </p>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
+      <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
         <div className="dashboard-card p-6 text-center">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-violet-50 text-2xl font-bold text-violet-700">
             {user.name.charAt(0).toUpperCase()}
@@ -78,7 +78,7 @@ export default function UserDetailPage({ user, onBack }: Props) {
         </div>
 
         <div className="dashboard-card p-6">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <Info label="Email" value={user.email} icon={Mail} />
             <Info label="Phone" value={user.phone || "-"} icon={UserRound} />
             <Info

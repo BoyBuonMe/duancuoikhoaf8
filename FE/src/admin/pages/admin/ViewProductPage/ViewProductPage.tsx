@@ -33,7 +33,7 @@ export default function ViewProductPage({ product, onBack, onEdit }: Props) {
         Quay lại danh sách
       </button>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-950">
             Chi tiết sản phẩm
@@ -50,7 +50,7 @@ export default function ViewProductPage({ product, onBack, onEdit }: Props) {
         </button>
       </div>
 
-      <div className="dashboard-card max-w-4xl p-6 space-y-6 animate-card-in delay-150">
+      <div className="dashboard-card w-full space-y-6 p-4 animate-card-in delay-150 sm:p-6">
         {/* Images */}
         {product.imageUrls.length > 0 && (
           <div>
@@ -74,7 +74,7 @@ export default function ViewProductPage({ product, onBack, onEdit }: Props) {
         )}
 
         {/* Details */}
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase mb-1">
               Tên sản phẩm

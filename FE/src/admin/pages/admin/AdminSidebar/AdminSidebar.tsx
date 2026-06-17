@@ -35,12 +35,42 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", page: "dashboard", href: "/admin" },
-  { icon: Package, label: "San pham", page: "products", href: "/admin/products" },
-  { icon: ShoppingCart, label: "Don hang", page: "orders", href: "/admin/orders" },
-  { icon: Users, label: "Khach hang", page: "customers", href: "/admin/customers" },
-  { icon: Tag, label: "Khuyen mai", page: "promotions", href: "/admin/promotions" },
-  { icon: Settings, label: "Cai dat", page: "settings", href: "/admin/settings" },
+  {
+    icon: LayoutDashboard,
+    label: "Dashboard",
+    page: "dashboard",
+    href: "/admin",
+  },
+  {
+    icon: Package,
+    label: "Sản phẩm",
+    page: "products",
+    href: "/admin/products",
+  },
+  {
+    icon: ShoppingCart,
+    label: "Đơn hàng",
+    page: "orders",
+    href: "/admin/orders",
+  },
+  {
+    icon: Users,
+    label: "Khách hàng",
+    page: "customers",
+    href: "/admin/customers",
+  },
+  {
+    icon: Tag,
+    label: "Khuyến mãi",
+    page: "promotions",
+    href: "/admin/promotions",
+  },
+  {
+    icon: Settings,
+    label: "Cài đặt",
+    page: "settings",
+    href: "/admin/settings",
+  },
 ];
 
 export default function AdminSidebar() {
@@ -57,25 +87,25 @@ export default function AdminSidebar() {
     window.location.assign("/account/login");
   }
 
-  const displayName = user?.name || user?.email?.split("@")[0] || "Tai khoan";
-  const displayEmail = user?.email || "Chua co email";
+  const displayName = user?.name || user?.email?.split("@")[0] || "Tài khoản";
+  const displayEmail = user?.email || "Chưa có email";
   const userInitial = displayName.charAt(0).toUpperCase();
 
   return (
-    <aside className="admin-shell-enter flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white text-slate-700 shadow-sm">
-      <div className="flex items-center gap-3 border-b border-slate-200 px-5 py-4">
+    <aside className="admin-shell-enter flex w-full shrink-0 flex-col border-b border-slate-200 bg-white text-slate-700 shadow-sm lg:min-h-screen lg:w-64 lg:border-b-0 lg:border-r">
+      <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3 lg:px-5 lg:py-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
           <PanelLeft size={20} />
         </div>
         <div className="min-w-0">
           <p className="text-base font-bold tracking-tight text-slate-950">
-            AdminShop
+            GymTier Admin
           </p>
-          <p className="text-xs text-slate-500">Trung tam dieu khien</p>
+          <p className="text-xs text-slate-500">Trung tâm điều khiển</p>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-5">
+      <nav className="flex gap-2 overflow-x-auto px-3 py-3 lg:block lg:flex-1 lg:space-y-1 lg:overflow-visible lg:px-3 lg:py-5">
         {navItems.map((item, index) => {
           const active =
             item.href === "/admin"
@@ -86,7 +116,7 @@ export default function AdminSidebar() {
             <Link
               key={item.page}
               href={item.href}
-              className={`admin-nav-item group flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold transition-all duration-200 ${
+              className={`admin-nav-item group flex h-10 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition-all duration-200 lg:h-11 lg:w-full lg:gap-3 ${
                 active
                   ? "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100"
                   : "text-slate-500 hover:bg-slate-50 hover:text-slate-950"
@@ -102,10 +132,10 @@ export default function AdminSidebar() {
               >
                 <item.icon size={17} />
               </span>
-              <span className="flex-1 text-left">{item.label}</span>
+              <span className="whitespace-nowrap text-left lg:flex-1">{item.label}</span>
               <ChevronRight
                 size={15}
-                className={`transition-transform ${
+                className={`hidden transition-transform lg:block ${
                   active
                     ? "translate-x-0 opacity-100"
                     : "-translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-60"
@@ -116,7 +146,7 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      <div className="border-t border-slate-200 p-3">
+      <div className="hidden border-t border-slate-200 p-3 lg:block">
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
@@ -130,7 +160,7 @@ export default function AdminSidebar() {
             </div>
             <button
               onClick={handleLogout}
-              title="Dang xuat"
+              title="Đăng xuất"
               className="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600"
             >
               <LogOut size={17} />

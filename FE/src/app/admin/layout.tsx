@@ -3,7 +3,7 @@ import ReduxProvider from "@/admin/ReduxProvider";
 import AdminDashboard from "@/admin/pages/AdminDashboard";
 
 export const metadata: Metadata = {
-  title: "AdminShop",
+  title: "GymTier Admin",
   description: "E-commerce admin dashboard",
 };
 

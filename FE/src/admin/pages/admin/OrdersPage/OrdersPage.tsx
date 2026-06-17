@@ -209,15 +209,15 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-6 animate-page-in">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-3">
-          <div className="relative">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className="relative w-full sm:w-auto">
             <Search
               size={17}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
             />
             <input
-              className="w-72 rounded-lg border border-gray-200 py-2 pl-9 pr-4 text-sm outline-none transition focus:ring-2 focus:ring-indigo-300"
+              className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-4 text-sm outline-none transition focus:ring-2 focus:ring-indigo-300 sm:w-80"
               placeholder="Tìm mã đơn, khách hàng, sản phẩm..."
               value={search}
               onChange={(event) => {
@@ -228,7 +228,7 @@ export default function OrdersPage() {
           </div>
 
           <select
-            className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-indigo-300"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-indigo-300 sm:w-auto"
             value={statusFilter}
             onChange={(event) => {
               setStatusFilter(event.target.value as "all" | OrderStatus);

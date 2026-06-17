@@ -16,8 +16,8 @@ export default function DeleteUserModal({
   isDeleting,
 }: Props) {
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4">
+      <div className="w-full max-w-5xl rounded-lg bg-white shadow-xl">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <h3 className="text-base font-semibold text-gray-800">
             Xóa người dùng
@@ -31,8 +31,8 @@ export default function DeleteUserModal({
           </button>
         </div>
 
-        <div className="p-6">
-          <div className="flex items-center gap-4 mb-4">
+        <div className="p-4 sm:p-6">
+          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl shrink-0">
               🗑️
             </div>
@@ -56,18 +56,18 @@ export default function DeleteUserModal({
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+        <div className="flex flex-col-reverse gap-3 border-t border-gray-100 px-4 py-4 sm:flex-row sm:justify-end sm:px-6">
           <button
             onClick={onClose}
             disabled={isDeleting}
-            className="px-4 py-2 text-sm border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 sm:w-auto"
           >
             Hủy
           </button>
           <button
             onClick={onConfirm}
             disabled={isDeleting}
-            className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+            className="w-full rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition-colors hover:bg-red-700 disabled:opacity-50 sm:w-auto"
           >
             {isDeleting ? "Đang xóa..." : "Xóa người dùng"}
           </button>

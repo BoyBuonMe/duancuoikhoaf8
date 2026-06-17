@@ -11,20 +11,20 @@ export function userFormSchema() {
     name: z
       .string()
       .trim()
-      .min(2, "Ho ten phai co it nhat 2 ky tu")
-      .max(80, "Ho ten khong duoc qua 80 ky tu"),
+      .min(2, "Họ tên phải có ít nhất 2 ký tự")
+      .max(80, "Họ tên không được quá 80 ký tự"),
     phone: z
       .string()
       .trim()
       .refine(
         (value) => !value || /^[0-9+\-\s()]{8,20}$/.test(value),
-        "Số điện thoại khong hop le",
+        "Số điện thoại không hợp lệ",
       ),
     role: z.enum(USER_ROLE_OPTIONS, {
-      message: "Vui long chon vai tro hop le",
+      message: "Vui lòng chọn vai trò hợp lệ",
     }),
     status: z.enum(USER_STATUS_OPTIONS, {
-      message: "Vui long chon trang thai hop le",
+      message: "Vui lòng chọn trạng thái hợp lệ",
     }),
   });
 }
@@ -61,38 +61,38 @@ export function voucherFormSchema() {
     code: z
       .string()
       .trim()
-      .min(2, "Mã voucher phai co it nhat 2 ky tu")
-      .max(60, "Mã voucher khong duoc qua 60 ky tu"),
+      .min(2, "Mã voucher phải có ít nhất 2 ký tự")
+      .max(60, "Mã voucher không được quá 60 ký tự"),
     label: z
       .string()
       .trim()
-      .min(2, "Tên voucher phai co it nhat 2 ky tu")
-      .max(120, "Tên voucher khong duoc qua 120 ky tu"),
+      .min(2, "Tên voucher phải có ít nhất 2 ký tự")
+      .max(120, "Tên voucher không được quá 120 ký tự"),
     discountValue: z
       .string()
       .trim()
-      .min(1, "Giá trị giam khong duoc de trong")
+      .min(1, "Giá trị giảm không được để trống")
       .refine(
         (value) =>
           Number.isFinite(Number(value)) &&
           Number(value) > 0 &&
           Number(value) <= 100,
-        "Giá trị giam phai tu 1 den 100",
+        "Giá trị giảm phải từ 1 đến 100",
       ),
     minSubtotal: z
       .string()
       .trim()
-      .min(1, "Đơn tối thiểu khong duoc de trong")
+      .min(1, "Đơn tối thiểu không được để trống")
       .refine(
         (value) => Number.isFinite(Number(value)) && Number(value) >= 0,
-        "Đơn tối thiểu khong hop le",
+        "Đơn tối thiểu không hợp lệ",
       ),
     categoryKeywords: z.string(),
     titleKeywords: z.string(),
     productSourceUrls: z.string(),
-    expiresAt: z.string().min(1, "Ngày hết hạn khong duoc de trong"),
+    expiresAt: z.string().min(1, "Ngày hết hạn không được để trống"),
     isActive: z.enum(["active", "inactive"], {
-      message: "Vui long chon trang thai hop le",
+      message: "Vui lòng chọn trạng thái hợp lệ",
     }),
   });
 }

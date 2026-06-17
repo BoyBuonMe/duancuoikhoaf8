@@ -101,9 +101,9 @@ export default function AddProductPage({ onBack }: Props) {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="dashboard-card max-w-4xl p-6 animate-card-in delay-150"
+        className="dashboard-card w-full p-4 animate-card-in delay-150 sm:p-6"
       >
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           <Field label="Tên sản phẩm" error={errors.title?.message}>
             <input
               {...register("title")}
@@ -166,7 +166,7 @@ export default function AddProductPage({ onBack }: Props) {
           </p>
         )}
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={onBack}

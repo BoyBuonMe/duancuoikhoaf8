@@ -9,27 +9,27 @@ import type { AdminPage } from "./admin/AdminSidebar/AdminSidebar";
 const pageTitles: Record<AdminPage, { title: string; subtitle: string }> = {
   dashboard: {
     title: "Dashboard",
-    subtitle: "Tong quan van hanh cua hang",
+    subtitle: "Tổng quan vận hành cửa hàng",
   },
   products: {
-    title: "San pham",
-    subtitle: "Quan ly danh muc san pham",
+    title: "Sản phẩm",
+    subtitle: "Quản lý danh mục sản phẩm",
   },
   orders: {
-    title: "Don hang",
-    subtitle: "Theo doi va xu ly don hang",
+    title: "Đơn hàng",
+    subtitle: "Theo dõi và xử lý đơn hàng",
   },
   customers: {
-    title: "Khach hang",
-    subtitle: "Quan ly tai khoan khach hang",
+    title: "Khách hàng",
+    subtitle: "Quản lý tài khoản khách hàng",
   },
   promotions: {
-    title: "Khuyen mai",
-    subtitle: "Quan ly voucher va ma giam gia",
+    title: "Khuyến mãi",
+    subtitle: "Quản lý voucher và mã giảm giá",
   },
   settings: {
-    title: "Cai dat",
-    subtitle: "Cau hinh he thong",
+    title: "Cài đặt",
+    subtitle: "Cấu hình hệ thống",
   },
 };
 
@@ -52,16 +52,16 @@ export default function AdminDashboard({
   const { title, subtitle } = pageTitles[page];
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
+    <div className="flex min-h-screen flex-col bg-slate-100 lg:flex-row">
       <AdminSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-6 backdrop-blur">
-          <div>
+        <header className="flex min-h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
+          <div className="min-w-0">
             <h1 className="text-xl font-bold tracking-tight text-slate-950">
               {title}
             </h1>
-            <p className="mt-0.5 text-xs font-medium text-slate-500">
+            <p className="mt-0.5 truncate text-xs font-medium text-slate-500">
               {subtitle}
             </p>
           </div>
@@ -73,7 +73,7 @@ export default function AdminDashboard({
           </button>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
           <div key={page} className="h-full animate-page-in">
             {children}
           </div>

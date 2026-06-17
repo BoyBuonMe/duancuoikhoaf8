@@ -79,7 +79,7 @@ export const getVouchers = createAsyncThunk(
         vouchers: normalizeVouchers(response),
       };
     } catch (error: unknown) {
-      return rejectWithValue(getVoucherError(error, "Loi tai danh sach voucher"));
+      return rejectWithValue(getVoucherError(error, "Lỗi tải danh sách voucher"));
     }
   },
 );

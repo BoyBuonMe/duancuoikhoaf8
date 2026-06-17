@@ -48,7 +48,7 @@ export const getUsers = createAsyncThunk(
         users: response.users.map(normalizeAdminUser),
       };
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Loi tai danh sach users";
+      const msg = e instanceof Error ? e.message : "Lỗi tải danh sách người dùng";
       return rejectWithValue(msg);
     }
   },
@@ -75,7 +75,7 @@ export const editUser = createAsyncThunk(
           : undefined;
       const msg =
         responseMessage ??
-        (e instanceof Error ? e.message : "Loi cap nhat user");
+        (e instanceof Error ? e.message : "Lỗi cập nhật người dùng");
       return rejectWithValue(msg);
     }
   },
@@ -101,7 +101,7 @@ export const removeUser = createAsyncThunk(
       await http.del(`/admin/users/${id}`);
       return id;
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Loi xoa user";
+      const msg = e instanceof Error ? e.message : "Lỗi xóa người dùng";
       return rejectWithValue(msg);
     }
   },
