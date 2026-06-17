@@ -1,20 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { MessageCircle, X } from "lucide-react";
 import { useAuth } from "@/features/auth";
 import { AiChatPanel } from "@/components/chat/AiChatPanel";
 import { SupportChatPanel } from "@/components/chat/SupportChatPanel";
+import { AdminChatWidget } from "@/components/chat/AdminChatWidget";
 
 type ChatTab = "ai" | "support";
 
 export function ChatWidget() {
   const { isAuthenticated, sessionChecked } = useAuth();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<ChatTab>("ai");
 
   if (!sessionChecked || !isAuthenticated) {
     return null;
+  }
+
+  // On the admin dashboard, show the support inbox widget (no AI assistant).
+  if (pathname?.startsWith("/admin")) {
+    return <AdminChatWidget />;
   }
 
   return (

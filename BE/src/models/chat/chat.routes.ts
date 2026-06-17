@@ -38,6 +38,11 @@ router.patch(
   validate(updateSupportConversationBodySchema),
   chatController.updateSupportConversation,
 );
+router.delete(
+  "/support/conversations/:id",
+  validate(conversationIdParamsSchema, "params"),
+  chatController.deleteSupportConversation,
+);
 router.get(
   "/support/conversations/:id/messages",
   validate(conversationIdParamsSchema, "params"),

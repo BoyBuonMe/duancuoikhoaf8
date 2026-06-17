@@ -121,6 +121,22 @@ export async function updateSupportConversation(
   }
 }
 
+/** DELETE /api/chat/support/conversations/:id */
+export async function deleteSupportConversation(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { userId, role } = userContext(req);
+    const { id } = req.params as ConversationIdParams;
+    const result = await chatService.deleteSupportConversation(userId, role, id);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+}
+
 /** GET /api/chat/support/conversations/:id/messages */
 export async function listSupportMessages(
   req: Request,

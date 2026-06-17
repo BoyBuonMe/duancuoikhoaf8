@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  deleteSupportConversationApi,
   listSupportConversationsApi,
   listSupportMessagesApi,
   sendSupportMessageApi,
@@ -39,11 +40,23 @@ function messagesEqual(a: ChatMessage[], b: ChatMessage[]) {
   return a.every((item, index) => item.id === b[index].id);
 }
 
-export function useAdminSupportInbox(initialStatus?: ConversationStatus) {
+interface UseAdminSupportInboxOptions {
+  initialStatus?: ConversationStatus | "all";
+  autoSelect?: boolean;
+}
+
+export function useAdminSupportInbox(
+  options?: ConversationStatus | UseAdminSupportInboxOptions,
+) {
+  const normalized: UseAdminSupportInboxOptions =
+    typeof options === "string" ? { initialStatus: options } : options ?? {};
+  const { initialStatus, autoSelect = true } = normalized;
+
   const [statusFilter, setStatusFilter] = useState<ConversationStatus | "all">(
     initialStatus ?? "open",
   );
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => new Set());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoadingList, setIsLoadingList] = useState(true);
@@ -53,6 +66,9 @@ export function useAdminSupportInbox(initialStatus?: ConversationStatus) {
 
   const selectedIdRef = useRef(selectedId);
   selectedIdRef.current = selectedId;
+
+  const autoSelectRef = useRef(autoSelect);
+  autoSelectRef.current = autoSelect;
 
   const loadConversations = useCallback(
     async (options?: { silent?: boolean }) => {
@@ -69,13 +85,20 @@ export function useAdminSupportInbox(initialStatus?: ConversationStatus) {
         setConversations((prev) => (conversationsEqual(prev, rows) ? prev : rows));
 
         const currentSelectedId = selectedIdRef.current;
-        if (rows.length > 0 && !currentSelectedId) {
-          setSelectedId(rows[0].id);
+        if (autoSelectRef.current) {
+          if (rows.length > 0 && !currentSelectedId) {
+            setSelectedId(rows[0].id);
+          } else if (
+            currentSelectedId &&
+            !rows.some((row) => row.id === currentSelectedId)
+          ) {
+            setSelectedId(rows[0]?.id ?? null);
+          }
         } else if (
           currentSelectedId &&
           !rows.some((row) => row.id === currentSelectedId)
         ) {
-          setSelectedId(rows[0]?.id ?? null);
+          setSelectedId(null);
         }
       } catch (e) {
         if (!silent) {
@@ -144,6 +167,12 @@ export function useAdminSupportInbox(initialStatus?: ConversationStatus) {
     onConversationUpdated: () => {
       void loadConversationsRef.current({ silent: true });
     },
+    onConversationDeleted: ({ conversationId }) => {
+      setConversations((prev) => prev.filter((c) => c.id !== conversationId));
+      if (selectedIdRef.current === conversationId) {
+        setSelectedId(null);
+      }
+    },
   });
 
   useEffect(() => {
@@ -192,13 +221,48 @@ export function useAdminSupportInbox(initialStatus?: ConversationStatus) {
     }
   };
 
+  // X — only hides the conversation locally, does not touch the server.
+  const hideConversation = useCallback((conversationId: string) => {
+    setHiddenIds((prev) => {
+      const next = new Set(prev);
+      next.add(conversationId);
+      return next;
+    });
+    setSelectedId((current) =>
+      current === conversationId ? null : current,
+    );
+  }, []);
+
+  // Delete — kills the conversation on the server (admin only).
+  const deleteConversation = useCallback(
+    async (conversationId?: string) => {
+      const targetId = conversationId ?? selectedIdRef.current;
+      if (!targetId) return;
+      setError(null);
+      try {
+        await deleteSupportConversationApi(targetId);
+        setConversations((prev) => prev.filter((c) => c.id !== targetId));
+        setSelectedId((current) => (current === targetId ? null : current));
+      } catch (e) {
+        setError(
+          e instanceof Error ? e.message : "Failed to delete conversation",
+        );
+      }
+    },
+    [],
+  );
+
+  const visibleConversations = conversations.filter(
+    (c) => !hiddenIds.has(c.id),
+  );
+
   const selectedConversation =
     conversations.find((c) => c.id === selectedId) ?? null;
 
   return {
     statusFilter,
     setStatusFilter,
-    conversations,
+    conversations: visibleConversations,
     selectedId,
     setSelectedId,
     selectedConversation,
@@ -210,6 +274,8 @@ export function useAdminSupportInbox(initialStatus?: ConversationStatus) {
     usingPolling,
     sendReply,
     closeConversation,
+    hideConversation,
+    deleteConversation,
     refresh: () => loadConversations(),
   };
 }

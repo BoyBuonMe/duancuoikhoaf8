@@ -2,6 +2,7 @@ import * as aiService from "@/models/chat/ai.service";
 import * as chatRepo from "@/models/chat/chat.repository";
 import {
   assertValidObjectId,
+  emitConversationDeleted,
   emitSupportMessage,
   isDashboardRole,
   serializeConversation,
@@ -209,6 +210,27 @@ export async function updateSupportConversation(
 
   if (!updated) throw httpError("Conversation not found", 404);
   return serializeConversation(updated);
+}
+
+export async function deleteSupportConversation(
+  userId: string,
+  role: string | undefined,
+  conversationId: string,
+) {
+  if (!isDashboardRole(role)) {
+    throw httpError("Admin access required", 403);
+  }
+
+  const conversation = await getConversationForUser(conversationId, userId, role);
+  if (conversation.type !== "support") {
+    throw httpError("Not a support conversation", 400);
+  }
+
+  const deleted = await chatRepo.deleteConversation(conversationId);
+  if (!deleted) throw httpError("Conversation not found", 404);
+
+  await emitConversationDeleted(conversationId);
+  return { id: conversationId };
 }
 
 export async function authorizePrivateChannel(

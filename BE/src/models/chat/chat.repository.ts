@@ -62,6 +62,7 @@ export async function listSupportConversationsForAdmin(filters: {
   return Conversation.find(query)
     .sort({ lastMessageAt: -1 })
     .limit(filters.limit ?? 50)
+    .populate("userId", "name email")
     .lean();
 }
 
@@ -84,6 +85,14 @@ export async function updateConversation(
   }
 
   return Conversation.findByIdAndUpdate(id, { $set }, { new: true }).lean();
+}
+
+export async function deleteConversation(id: string) {
+  const deleted = await Conversation.findByIdAndDelete(id).lean();
+  if (deleted) {
+    await Message.deleteMany({ conversationId: toObjectId(id) });
+  }
+  return deleted;
 }
 
 export async function createMessage(data: {

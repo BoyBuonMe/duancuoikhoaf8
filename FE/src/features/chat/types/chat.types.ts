@@ -6,6 +6,8 @@ export interface ChatConversation {
   id: string;
   type: ConversationType;
   userId: string;
+  userName?: string | null;
+  userEmail?: string | null;
   status: ConversationStatus;
   assignedAdminId: string | null;
   lastMessageAt: string;

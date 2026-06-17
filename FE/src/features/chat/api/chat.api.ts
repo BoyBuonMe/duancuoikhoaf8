@@ -74,6 +74,15 @@ export async function sendSupportMessageApi(
   return data;
 }
 
+export async function deleteSupportConversationApi(
+  conversationId: string,
+): Promise<{ id: string }> {
+  const { data } = await httpClient.delete<{ id: string }>(
+    `/chat/support/conversations/${encodeURIComponent(conversationId)}`,
+  );
+  return data;
+}
+
 export async function updateSupportConversationApi(
   conversationId: string,
   body: { status?: ConversationStatus; assignedAdminId?: string | null },

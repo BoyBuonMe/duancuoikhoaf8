@@ -44,6 +44,7 @@ interface UseSupportRealtimeOptions {
     conversationId: string;
     lastMessageAt: string;
   }) => void;
+  onConversationDeleted?: (payload: { conversationId: string }) => void;
 }
 
 export function useSupportRealtime({
@@ -52,11 +53,13 @@ export function useSupportRealtime({
   subscribeAdminInbox = false,
   onMessage,
   onConversationUpdated,
+  onConversationDeleted,
 }: UseSupportRealtimeOptions) {
   const [usingPolling, setUsingPolling] = useState(!isPusherConfigured());
   const pusherRef = useRef<Pusher | null>(null);
   const onMessageRef = useRef(onMessage);
   const onConversationUpdatedRef = useRef(onConversationUpdated);
+  const onConversationDeletedRef = useRef(onConversationDeleted);
 
   useEffect(() => {
     onMessageRef.current = onMessage;
@@ -65,6 +68,10 @@ export function useSupportRealtime({
   useEffect(() => {
     onConversationUpdatedRef.current = onConversationUpdated;
   }, [onConversationUpdated]);
+
+  useEffect(() => {
+    onConversationDeletedRef.current = onConversationDeleted;
+  }, [onConversationDeleted]);
 
   useEffect(() => {
     if (!enabled || !isPusherConfigured()) {
@@ -97,6 +104,13 @@ export function useSupportRealtime({
       onMessageRef.current?.(payload);
     });
 
+    channel.bind(
+      "conversation.deleted",
+      (payload: { conversationId: string }) => {
+        onConversationDeletedRef.current?.(payload);
+      },
+    );
+
     return () => {
       channel.unbind_all();
       pusherRef.current?.unsubscribe(channelName);
@@ -114,6 +128,13 @@ export function useSupportRealtime({
       "conversation.updated",
       (payload: { conversationId: string; lastMessageAt: string }) => {
         onConversationUpdatedRef.current?.(payload);
+      },
+    );
+
+    channel.bind(
+      "conversation.deleted",
+      (payload: { conversationId: string }) => {
+        onConversationDeletedRef.current?.(payload);
       },
     );
 

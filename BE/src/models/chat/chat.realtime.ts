@@ -30,20 +30,41 @@ export function serializeMessage(doc: {
   };
 }
 
+type PopulatedUser = {
+  _id: { toString(): string };
+  name?: string;
+  email?: string;
+};
+
+function isPopulatedUser(value: unknown): value is PopulatedUser {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "email" in (value as Record<string, unknown>)
+  );
+}
+
 export function serializeConversation(doc: {
   _id: { toString(): string };
   type: string;
-  userId: { toString(): string };
+  userId: { toString(): string } | PopulatedUser;
   status: string;
   assignedAdminId?: { toString(): string } | null;
   lastMessageAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }) {
+  const populatedUser = isPopulatedUser(doc.userId) ? doc.userId : null;
+  const userId = populatedUser
+    ? populatedUser._id.toString()
+    : doc.userId.toString();
+
   return {
     id: doc._id.toString(),
     type: doc.type,
-    userId: doc.userId.toString(),
+    userId,
+    userName: populatedUser?.name?.trim() || null,
+    userEmail: populatedUser?.email ?? null,
     status: doc.status,
     assignedAdminId: doc.assignedAdminId?.toString() ?? null,
     lastMessageAt: doc.lastMessageAt.toISOString(),
@@ -63,6 +84,23 @@ export async function emitSupportMessage(
     await pusher.trigger("private-admin-inbox", "conversation.updated", {
       conversationId,
       lastMessageAt: message.createdAt,
+    });
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[chat] pusher emit failed (Soketi may be offline):", err);
+    }
+  }
+}
+
+export async function emitConversationDeleted(conversationId: string) {
+  if (!isPusherConfigured()) return;
+
+  try {
+    await pusher.trigger(supportChannelName(conversationId), "conversation.deleted", {
+      conversationId,
+    });
+    await pusher.trigger("private-admin-inbox", "conversation.deleted", {
+      conversationId,
     });
   } catch (err) {
     if (process.env.NODE_ENV !== "production") {
