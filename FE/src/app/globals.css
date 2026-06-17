@@ -335,9 +335,9 @@ html.dark {
 
 .dashboard-card {
     border: 1px solid rgb(226 232 240 / 0.9);
-    border-radius: 18px;
-    background: rgb(255 255 255 / 0.96);
-    box-shadow: 0 18px 55px rgb(15 23 42 / 0.06);
+    border-radius: 8px;
+    background: rgb(255 255 255 / 0.98);
+    box-shadow: 0 10px 28px rgb(15 23 42 / 0.05);
 }
 
 .dashboard-card-enter {
@@ -345,9 +345,9 @@ html.dark {
 }
 
 .form-input {
-    height: 42px;
+    height: 40px;
     width: 100%;
-    border-radius: 12px;
+    border-radius: 8px;
     border: 1px solid rgb(226 232 240);
     background: white;
     color: rgb(15 23 42);

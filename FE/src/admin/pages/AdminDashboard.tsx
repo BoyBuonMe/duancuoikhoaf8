@@ -1,78 +1,81 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Bell } from "lucide-react";
+import { usePathname } from "next/navigation";
 import AdminSidebar from "./admin/AdminSidebar/AdminSidebar";
 import type { AdminPage } from "./admin/AdminSidebar/AdminSidebar";
-import DashboardOverview from "./admin/DashboardOverview/DashboardOverview";
-import OrdersPage from "./admin/OrdersPage/OrdersPage";
-import ProductsPage from "./admin/ProductsPage/ProductsPage";
-import UsersPage from "./admin/UsersPage/UsersPage";
-import VouchersPage from "./admin/VouchersPage/VouchersPage";
 
 const pageTitles: Record<AdminPage, { title: string; subtitle: string }> = {
   dashboard: {
     title: "Dashboard",
-    subtitle: "Tổng quan vận hành cửa hàng",
+    subtitle: "Tong quan van hanh cua hang",
   },
   products: {
-    title: "Sản phẩm",
-    subtitle: "Quản lý danh mục sản phẩm",
+    title: "San pham",
+    subtitle: "Quan ly danh muc san pham",
   },
   orders: {
-    title: "Đơn hàng",
-    subtitle: "Theo dõi và xử lý đơn hàng",
+    title: "Don hang",
+    subtitle: "Theo doi va xu ly don hang",
   },
   customers: {
-    title: "Khách hàng",
-    subtitle: "Quản lý tài khoản khách hàng",
+    title: "Khach hang",
+    subtitle: "Quan ly tai khoan khach hang",
   },
   promotions: {
-    title: "Khuyến mãi",
-    subtitle: "Quản lý voucher và mã giảm giá",
+    title: "Khuyen mai",
+    subtitle: "Quan ly voucher va ma giam gia",
   },
   settings: {
-    title: "Cài đặt",
-    subtitle: "Cấu hình hệ thống",
+    title: "Cai dat",
+    subtitle: "Cau hinh he thong",
   },
 };
 
-export default function AdminDashboard() {
-  const [activePage, setActivePage] = useState<AdminPage>("dashboard");
-  const { title, subtitle } = pageTitles[activePage];
+function pageFromPathname(pathname: string): AdminPage {
+  if (pathname.startsWith("/admin/products")) return "products";
+  if (pathname.startsWith("/admin/orders")) return "orders";
+  if (pathname.startsWith("/admin/customers")) return "customers";
+  if (pathname.startsWith("/admin/promotions")) return "promotions";
+  if (pathname.startsWith("/admin/settings")) return "settings";
+  return "dashboard";
+}
+
+export default function AdminDashboard({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const page = pageFromPathname(pathname);
+  const { title, subtitle } = pageTitles[page];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <AdminSidebar activePage={activePage} onPageChange={setActivePage} />
+    <div className="flex min-h-screen bg-slate-100">
+      <AdminSidebar />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-8">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-6 backdrop-blur">
           <div>
-            <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
-            <p className="text-xs text-gray-500">{subtitle}</p>
+            <h1 className="text-xl font-bold tracking-tight text-slate-950">
+              {title}
+            </h1>
+            <p className="mt-0.5 text-xs font-medium text-slate-500">
+              {subtitle}
+            </p>
           </div>
-          <button className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-500 shadow-sm transition hover:text-gray-700">
-            <Bell size={18} />
-            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+          <button className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-indigo-200 hover:text-indigo-600">
+            <Bell size={17} />
+            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
               3
             </span>
           </button>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-8">
-          <div key={activePage} className="h-full animate-page-in">
-            {activePage === "dashboard" && <DashboardOverview />}
-            {activePage === "products" && <ProductsPage />}
-            {activePage === "orders" && <OrdersPage />}
-            {activePage === "customers" && <UsersPage />}
-            {activePage === "promotions" && <VouchersPage />}
-            {activePage === "settings" && (
-              <div className="flex h-64 flex-col items-center justify-center gap-2 text-gray-400">
-                <p className="text-base font-medium">
-                  Tính năng đang phát triển
-                </p>
-              </div>
-            )}
+        <main className="flex-1 overflow-y-auto p-6">
+          <div key={page} className="h-full animate-page-in">
+            {children}
           </div>
         </main>
       </div>
