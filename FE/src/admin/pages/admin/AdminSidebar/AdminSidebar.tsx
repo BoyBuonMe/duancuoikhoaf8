@@ -92,7 +92,7 @@ export default function AdminSidebar() {
   const userInitial = displayName.charAt(0).toUpperCase();
 
   return (
-    <aside className="admin-shell-enter flex w-full shrink-0 flex-col border-b border-slate-200 bg-white text-slate-700 shadow-sm lg:min-h-screen lg:w-64 lg:border-b-0 lg:border-r">
+    <aside className="admin-shell-enter flex w-full shrink-0 flex-col border-b border-slate-200 bg-white text-slate-700 shadow-sm lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:self-start lg:border-b-0 lg:border-r">
       <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3 lg:px-5 lg:py-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
           <PanelLeft size={20} />
@@ -105,7 +105,7 @@ export default function AdminSidebar() {
         </div>
       </div>
 
-      <nav className="flex gap-2 overflow-x-auto px-3 py-3 lg:block lg:flex-1 lg:space-y-1 lg:overflow-visible lg:px-3 lg:py-5">
+      <nav className="flex gap-2 overflow-x-auto px-3 py-3 lg:block lg:flex-1 lg:space-y-3 lg:overflow-visible lg:px-3 lg:py-6">
         {navItems.map((item, index) => {
           const active =
             item.href === "/admin"
@@ -116,7 +116,7 @@ export default function AdminSidebar() {
             <Link
               key={item.page}
               href={item.href}
-              className={`admin-nav-item group flex h-10 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition-all duration-200 lg:h-11 lg:w-full lg:gap-3 ${
+              className={`admin-nav-item group flex h-10 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition-all duration-200 lg:h-[52px] lg:w-full lg:gap-3 ${
                 active
                   ? "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100"
                   : "text-slate-500 hover:bg-slate-50 hover:text-slate-950"
@@ -124,7 +124,7 @@ export default function AdminSidebar() {
               style={{ animationDelay: `${index * 45}ms` }}
             >
               <span
-                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors ${
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors lg:h-9 lg:w-9 ${
                   active
                     ? "bg-indigo-600 text-white"
                     : "bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-slate-700"
