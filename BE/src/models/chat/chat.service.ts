@@ -2,6 +2,7 @@ import * as aiService from "@/models/chat/ai.service";
 import * as chatRepo from "@/models/chat/chat.repository";
 import {
   assertValidObjectId,
+  emitConversationClosed,
   emitConversationDeleted,
   emitSupportMessage,
   isDashboardRole,
@@ -108,6 +109,9 @@ export async function sendAiMessage(
 }
 
 export async function createSupportConversation(userId: string) {
+  const existing = await chatRepo.findLatestSupportConversation(userId);
+  if (existing) return serializeConversation(existing);
+
   const created = await chatRepo.createConversation({
     type: "support",
     userId,
@@ -231,6 +235,20 @@ export async function deleteSupportConversation(
 
   await emitConversationDeleted(conversationId);
   return { id: conversationId };
+}
+
+export async function closeStaleSupportConversations(idleMs: number) {
+  const cutoff = new Date(Date.now() - idleMs);
+  const staleIds = await chatRepo.findStaleSupportConversationIds(cutoff);
+  if (staleIds.length === 0) return 0;
+
+  await chatRepo.closeStaleSupportConversations(cutoff);
+
+  for (const id of staleIds) {
+    await emitConversationClosed(id);
+  }
+
+  return staleIds.length;
 }
 
 export async function authorizePrivateChannel(

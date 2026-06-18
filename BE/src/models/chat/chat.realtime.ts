@@ -109,6 +109,25 @@ export async function emitConversationDeleted(conversationId: string) {
   }
 }
 
+export async function emitConversationClosed(conversationId: string) {
+  if (!isPusherConfigured()) return;
+
+  try {
+    await pusher.trigger(supportChannelName(conversationId), "conversation.updated", {
+      conversationId,
+      status: "closed",
+    });
+    await pusher.trigger("private-admin-inbox", "conversation.updated", {
+      conversationId,
+      status: "closed",
+    });
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[chat] pusher emit failed (Soketi may be offline):", err);
+    }
+  }
+}
+
 export function assertValidObjectId(id: string, label = "id") {
   if (!/^[a-f\d]{24}$/i.test(id)) {
     throw httpError(`Invalid ${label}`, 400);

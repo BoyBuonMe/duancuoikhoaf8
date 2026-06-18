@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createSupportConversationApi,
   getOrCreateAiConversationApi,
@@ -80,19 +80,33 @@ export function useUserSupportChat() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const bootstrappingRef = useRef<Promise<ChatConversation | null> | null>(null);
+
   const bootstrap = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const { conversation: conv } = await createSupportConversationApi();
-      setConversation(conv);
-      const { messages: rows } = await listSupportMessagesApi(conv.id);
-      setMessages(rows);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to open support chat");
-    } finally {
-      setIsLoading(false);
-    }
+    // Guard against concurrent calls (e.g. React StrictMode double-invoke)
+    // creating duplicate conversations.
+    if (bootstrappingRef.current) return bootstrappingRef.current;
+
+    const task = (async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const { conversation: conv } = await createSupportConversationApi();
+        setConversation(conv);
+        const { messages: rows } = await listSupportMessagesApi(conv.id);
+        setMessages(rows);
+        return conv;
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to open support chat");
+        return null;
+      } finally {
+        setIsLoading(false);
+        bootstrappingRef.current = null;
+      }
+    })();
+
+    bootstrappingRef.current = task;
+    return task;
   }, []);
 
   const { usingPolling, pollMessages, pollIntervalMs } = useSupportRealtime({
@@ -117,13 +131,35 @@ export function useUserSupportChat() {
   }, [conversation?.id, usingPolling, pollMessages, pollIntervalMs]);
 
   const sendMessage = async (content: string) => {
-    if (!conversation || !content.trim()) return;
+    const text = content.trim();
+    if (!conversation || !text) return;
     setIsSending(true);
     setError(null);
     try {
-      const { message } = await sendSupportMessageApi(conversation.id, content.trim());
+      const { message } = await sendSupportMessageApi(conversation.id, text);
       setMessages((prev) => mergeMessage(prev, message));
     } catch (e) {
+      // The conversation may have been auto-closed after inactivity. Start a
+      // fresh conversation and resend so the user keeps chatting seamlessly.
+      const isClosed =
+        e instanceof Error && /closed/i.test(e.message);
+      if (isClosed) {
+        const conv = await bootstrap();
+        if (conv) {
+          try {
+            const { message } = await sendSupportMessageApi(conv.id, text);
+            setMessages((prev) => mergeMessage(prev, message));
+            return;
+          } catch (retryErr) {
+            setError(
+              retryErr instanceof Error
+                ? retryErr.message
+                : "Failed to send message",
+            );
+            return;
+          }
+        }
+      }
       setError(e instanceof Error ? e.message : "Failed to send message");
     } finally {
       setIsSending(false);

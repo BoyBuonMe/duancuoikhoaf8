@@ -252,9 +252,11 @@ export function useAdminSupportInbox(
     [],
   );
 
-  const visibleConversations = conversations.filter(
-    (c) => !hiddenIds.has(c.id),
-  );
+  const visibleConversations = conversations.filter((conv, index, arr) => {
+    if (hiddenIds.has(conv.id)) return false;
+    // Defense-in-depth: never render the same conversation id twice.
+    return arr.findIndex((c) => c.id === conv.id) === index;
+  });
 
   const selectedConversation =
     conversations.find((c) => c.id === selectedId) ?? null;

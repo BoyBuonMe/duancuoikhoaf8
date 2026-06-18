@@ -13,6 +13,7 @@ import {
 } from "@/config/pusher.config";
 import { vnpayConfig } from "@/config/vnpay.config";
 import { startVoucherNotificationScheduler } from "@/jobs/voucher-notification.scheduler";
+import { startChatInactivityScheduler } from "@/jobs/chat-inactivity.scheduler";
 
 const PORT = Number(process.env.PORT) || 3001;
 
@@ -65,6 +66,7 @@ connectDb()
     logPaymentConfig();
     logRealtimeConfig();
     startVoucherNotificationScheduler();
+    startChatInactivityScheduler();
     app.listen(PORT, () => {
       console.log(`Server listening on http://localhost:${PORT}`);
     });

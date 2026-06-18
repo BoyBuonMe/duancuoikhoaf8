@@ -40,6 +40,39 @@ export async function findLatestAiConversation(userId: string) {
     .lean();
 }
 
+export async function findLatestSupportConversation(userId: string) {
+  return Conversation.findOne({
+    userId: toObjectId(userId),
+    type: "support",
+    status: { $ne: "closed" },
+  })
+    .sort({ lastMessageAt: -1 })
+    .lean();
+}
+
+export async function closeStaleSupportConversations(cutoff: Date) {
+  const result = await Conversation.updateMany(
+    {
+      type: "support",
+      status: { $ne: "closed" },
+      lastMessageAt: { $lt: cutoff },
+    },
+    { $set: { status: "closed" } },
+  );
+  return result.modifiedCount ?? 0;
+}
+
+export async function findStaleSupportConversationIds(cutoff: Date) {
+  const rows = await Conversation.find({
+    type: "support",
+    status: { $ne: "closed" },
+    lastMessageAt: { $lt: cutoff },
+  })
+    .select("_id")
+    .lean();
+  return rows.map((row) => row._id.toString());
+}
+
 export async function listConversationsByUser(
   userId: string,
   type: ConversationType,
