@@ -4,3 +4,6 @@
 
 - Công cụ tính toán khoảng cách OpenStreetMap Nominatim.
 
+"C:\Users\PC\AppData\Local\nvm\v18.20.8\node.exe"
+"C:\Users\PC\AppData\Local\npm-cache\_npx\891e7c8709055751\node_modules\@soketi\soketi\bin\server.js" start
+

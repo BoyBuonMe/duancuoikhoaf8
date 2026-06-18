@@ -6,8 +6,14 @@ import {
   isLocalMomoCallbackUrl,
   momoConfig,
 } from "@/config/momo.config";
+import {
+  getPusherWsOrigin,
+  isPusherConfigured,
+  pusherConfig,
+} from "@/config/pusher.config";
 import { vnpayConfig } from "@/config/vnpay.config";
 import { startVoucherNotificationScheduler } from "@/jobs/voucher-notification.scheduler";
+import { startChatInactivityScheduler } from "@/jobs/chat-inactivity.scheduler";
 
 const PORT = Number(process.env.PORT) || 3001;
 
@@ -43,10 +49,24 @@ function logPaymentConfig() {
   }
 }
 
+function logRealtimeConfig() {
+  if (isPusherConfigured()) {
+    console.log(
+      `[realtime] Soketi/Pusher key=${pusherConfig.key} ws=${getPusherWsOrigin()}`,
+    );
+  } else {
+    console.warn(
+      "[realtime] PUSHER_* env not set — support chat realtime disabled until Soketi is configured.",
+    );
+  }
+}
+
 connectDb()
   .then(() => {
     logPaymentConfig();
+    logRealtimeConfig();
     startVoucherNotificationScheduler();
+    startChatInactivityScheduler();
     app.listen(PORT, () => {
       console.log(`Server listening on http://localhost:${PORT}`);
     });

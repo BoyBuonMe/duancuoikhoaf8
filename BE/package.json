@@ -16,6 +16,10 @@
     "generate:variants": "tsx scripts/generate-variants.ts",
     "rebalance:categories": "tsx scripts/rebalance-categories.ts",
     "seed:prepare": "npm run rebalance:categories && npm run generate:variants",
+    "init:chat-collections": "tsx scripts/init-chat-collections.ts",
+    "soketi": "docker compose -f ../docker-compose.yml up soketi",
+    "soketi:detach": "docker compose -f ../docker-compose.yml up soketi -d",
+    "test:soketi": "tsx scripts/test-soketi.ts",
     "test:momo": "tsx scripts/test-momo-create.ts",
     "test:momo:return": "tsx scripts/test-momo-return.ts",
     "tunnel:momo": "npx localtunnel --port 3001",
@@ -41,6 +45,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.2",
     "nodemailer": "^8.0.10",
+    "pusher": "^5.2.0",
     "qs": "^6.15.2",
     "zod": "^4.4.3"
   },
