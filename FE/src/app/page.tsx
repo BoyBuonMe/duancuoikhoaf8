@@ -21,8 +21,8 @@ export default async function Home() {
   const womenBestsellers = womenProducts.filter((product) => product.imageUrls[0]);
 
   return (
-    <main className="-mx-4 -my-9 flex flex-1 flex-col bg-store-paper sm:-mx-6 lg:-mx-8">
-      <section className="relative min-h-[calc(100vh-var(--header-h,0px))] overflow-hidden bg-store-ink text-white">
+    <main className="relative left-1/2 -my-9 flex w-screen -translate-x-1/2 flex-1 flex-col overflow-x-hidden bg-store-paper">
+      <section className="relative min-h-[calc(100vh-var(--header-h,0px))] overflow-hidden bg-store-ink text-white 2xl:aspect-[8/3] 2xl:min-h-0">
         <HomeHeroMedia {...homeHeroMedia} priority />
 
         <div className="absolute inset-0 bg-black/35" aria-hidden="true" />
@@ -44,7 +44,7 @@ export default async function Home() {
               </Link>
               <Link
                 href="/products"
-                className="inline-flex h-16 min-w-40 items-center justify-center border border-white bg-transparent px-7 text-base font-medium text-white transition-colors hover:bg-white hover:text-store-ink-strong"
+                className="inline-flex h-16 min-w-40 items-center justify-center border border-white bg-transparent px-7 text-base font-medium text-white transition-colors hover:bg-white hover:text-black"
               >
                 Shop New In
               </Link>

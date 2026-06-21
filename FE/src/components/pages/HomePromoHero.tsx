@@ -4,7 +4,7 @@ import { HomeHeroMedia } from "@/components/pages/HomeHeroMedia";
 
 export function HomePromoHero() {
   return (
-    <section className="relative min-h-[520px] overflow-hidden bg-store-ink text-white">
+    <section className="relative min-h-[520px] overflow-hidden bg-store-ink text-white 2xl:aspect-[8/3] 2xl:min-h-0">
       <HomeHeroMedia {...premiumLiftersHeroMedia} />
 
       <div className="absolute inset-0 bg-black/30" aria-hidden="true" />
@@ -25,7 +25,7 @@ export function HomePromoHero() {
             </Link>
             <Link
               href="/products/men"
-              className="inline-flex h-16 min-w-40 items-center justify-center border border-white bg-transparent px-7 text-base font-medium text-white transition-colors hover:bg-white hover:text-store-ink-strong"
+              className="inline-flex h-16 min-w-40 items-center justify-center border border-white bg-transparent px-7 text-base font-medium text-white transition-colors hover:bg-white hover:text-black"
             >
               Shop The Collection
             </Link>

@@ -58,6 +58,9 @@ export function SiteHeader({
   const backdropRef = useRef<HTMLDivElement>(null);
   const activeNavTriggerRef = useRef<HTMLDivElement | null>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastScrollYRef = useRef(0);
+  const announcementVisibleRef = useRef(true);
+  const ignoreScrollUntilRef = useRef(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeNav, setActiveNav] = useState<SiteHeaderNavItem | null>(null);
@@ -70,6 +73,7 @@ export function SiteHeader({
       ];
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [announcementVisible, setAnnouncementVisible] = useState(true);
 
   /* ── update --header-h so the fixed panel can sit right below the header ── */
   useEffect(() => {
@@ -96,6 +100,48 @@ export function SiteHeader({
     }, 4000);
     return () => window.clearInterval(t);
   }, [lines.length, paused]);
+
+  useEffect(() => {
+    const topThreshold = 8;
+    const scrollThreshold = 6;
+
+    lastScrollYRef.current = window.scrollY;
+
+    const syncAnnouncementVisibility = (visible: boolean) => {
+      if (announcementVisibleRef.current === visible) return;
+      announcementVisibleRef.current = visible;
+      ignoreScrollUntilRef.current = window.performance.now() + 350;
+      setAnnouncementVisible(visible);
+    };
+
+    const handleScroll = () => {
+      const currentScrollY = Math.max(window.scrollY, 0);
+      const delta = currentScrollY - lastScrollYRef.current;
+
+      if (currentScrollY <= topThreshold) {
+        syncAnnouncementVisibility(true);
+        lastScrollYRef.current = currentScrollY;
+        return;
+      }
+
+      if (window.performance.now() < ignoreScrollUntilRef.current) {
+        lastScrollYRef.current = currentScrollY;
+        return;
+      } else if (delta > scrollThreshold) {
+        syncAnnouncementVisibility(false);
+      } else if (delta < -scrollThreshold) {
+        syncAnnouncementVisibility(true);
+      }
+
+      if (Math.abs(delta) > scrollThreshold || currentScrollY <= topThreshold) {
+        lastScrollYRef.current = currentScrollY;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -161,7 +207,15 @@ export function SiteHeader({
         )}
       >
         {/* Announcement */}
-        <div className="border-b border-store-border/80 bg-store-surface">
+        <div
+          aria-hidden={!announcementVisible}
+          className={cn(
+            "overflow-hidden bg-store-surface transition-[max-height,opacity,transform,border-color] duration-300 ease-out",
+            announcementVisible
+              ? "max-h-14 translate-y-0 border-b border-store-border/80 opacity-100"
+              : "pointer-events-none max-h-0 -translate-y-2 border-b border-transparent opacity-0",
+          )}
+        >
           <div className="grid h-14 w-full grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 sm:px-6 lg:px-10">
             <div aria-hidden="true" />
             <div className="flex h-full min-w-0 items-center justify-center overflow-hidden text-center">
@@ -172,12 +226,14 @@ export function SiteHeader({
               >
                 <Link
                   href="/refer"
+                  tabIndex={announcementVisible ? undefined : -1}
                   className="flex h-full min-w-0 shrink-0 items-center justify-center whitespace-nowrap text-[11px] underline underline-offset-4 hover:no-underline sm:text-xs"
                 >
                   {line}
                 </Link>
                 <Link
                   href="/refer"
+                  tabIndex={announcementVisible ? undefined : -1}
                   className="flex h-full min-w-0 shrink-0 items-center justify-center whitespace-nowrap text-[11px] underline underline-offset-4 hover:no-underline sm:text-xs"
                 >
                   {nextLine}
@@ -189,6 +245,7 @@ export function SiteHeader({
                 type="button"
                 className="justify-self-end p-1 text-store-fg-muted hover:text-store-ink-strong"
                 onClick={() => setPaused((p) => !p)}
+                tabIndex={announcementVisible ? undefined : -1}
                 aria-label={
                   paused ? "Play announcements" : "Pause announcements"
                 }
