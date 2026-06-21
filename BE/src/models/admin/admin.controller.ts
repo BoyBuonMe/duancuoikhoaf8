@@ -149,6 +149,8 @@ export async function updateProduct(
     const product = await adminService.updateProduct(
       id,
       validatedBody<AdminUpdateProductBody>(req),
+      req.user?.id,
+      req.user?.role,
     );
     res.json({ product });
   } catch (e) {
@@ -163,7 +165,7 @@ export async function deleteProduct(
 ) {
   try {
     const id = requestId(req);
-    await adminService.deleteProduct(id);
+    await adminService.deleteProduct(id, req.user?.id, req.user?.role);
     res.status(204).end();
   } catch (e) {
     next(e);
@@ -272,6 +274,8 @@ export async function updateVoucher(
     const voucher = await adminService.updateVoucher(
       id,
       validatedBody<AdminUpdateVoucherBody>(req),
+      req.user?.id,
+      req.user?.role,
     );
     res.json({ voucher });
   } catch (e) {
@@ -286,7 +290,7 @@ export async function deleteVoucher(
 ) {
   try {
     const id = requestId(req);
-    await adminService.deleteVoucher(id);
+    await adminService.deleteVoucher(id, req.user?.id, req.user?.role);
     res.status(204).end();
   } catch (e) {
     next(e);

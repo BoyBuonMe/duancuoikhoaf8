@@ -75,8 +75,8 @@ export function useSupportRealtime({
 
   useEffect(() => {
     if (!enabled || !isPusherConfigured()) {
-      setUsingPolling(true);
-      return;
+      const timer = window.setTimeout(() => setUsingPolling(true), 0);
+      return () => window.clearTimeout(timer);
     }
 
     const pusher = createPusherClient();

@@ -455,6 +455,7 @@ export default function DashboardOverview() {
                   <p className="text-sm font-bold text-slate-400">#{index + 1}</p>
                   <div className="flex min-w-0 items-center gap-3">
                     {getProductImage(product) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={getProductImage(product)}
                         alt={product.title}

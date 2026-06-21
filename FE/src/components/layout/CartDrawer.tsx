@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { IconBag, IconClose, IconHeart, IconOrder } from "@/components/icons";
+import { IconBag, IconClose, IconOrder } from "@/components/icons";
 import { useAuth } from "@/features/auth";
 import {
   Sheet,

@@ -53,7 +53,7 @@ export function LoginForm() {
       setSession(user, token);
       toast.success(`Welcome back, ${user.name || "User"}!`);
       if (isDashboardUser(user)) {
-        window.location.href = adminDashboardUrl();
+        window.location.assign(adminDashboardUrl());
         return;
       }
       router.push("/account");
@@ -120,6 +120,7 @@ export function LoginForm() {
           endAdornment={
             <button
               type="button"
+              tabIndex={-1}
               onClick={() => setShowPassword((v) => !v)}
               className="text-store-fg-muted hover:text-store-ink"
               aria-label={showPassword ? "Hide password" : "Show password"}

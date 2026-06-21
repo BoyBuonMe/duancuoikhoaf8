@@ -41,6 +41,14 @@ export default function EditUserPage({ user, onBack }: Props) {
   const currentUser = useAppSelector((state) => state.auth.user);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const canEditFullInfo = currentUser?.role === "boss";
+  const canEditRole = canEditFullInfo || user.role !== "boss";
+  const roleOptions = useMemo(
+    () =>
+      canEditFullInfo
+        ? USER_ROLE_OPTIONS
+        : USER_ROLE_OPTIONS.filter((role) => role !== "boss"),
+    [canEditFullInfo],
+  );
   const schema = useMemo(() => userFormSchema(), []);
 
   const {
@@ -59,6 +67,11 @@ export default function EditUserPage({ user, onBack }: Props) {
 
   async function submitForm(values: UserFormValues) {
     setSubmitError(null);
+
+    if (!canEditRole) {
+      setSubmitError("Admin không có quyền chỉnh sửa tài khoản boss");
+      return;
+    }
 
     const payload = canEditFullInfo
       ? ({
@@ -143,12 +156,16 @@ export default function EditUserPage({ user, onBack }: Props) {
             <select
               {...register("role")}
               className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              disabled={!canEditRole}
             >
-              {USER_ROLE_OPTIONS.map((r) => (
+              {roleOptions.map((r) => (
                 <option key={r} value={r}>
                   {ROLE_LABELS[r]}
                 </option>
               ))}
+              {!canEditFullInfo && user.role === "boss" ? (
+                <option value="boss">{ROLE_LABELS.boss}</option>
+              ) : null}
             </select>
             {errors.role && (
               <p className="text-xs text-red-500 mt-1">{errors.role.message}</p>

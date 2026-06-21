@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, X } from "lucide-react";
-import { useAuth } from "@/features/auth";
 import { useAiChat } from "@/features/chat";
 import type { ChatMessage } from "@/features/chat/types/chat.types";
 
@@ -63,14 +61,14 @@ export function AiChatPanel() {
   const { messages, isLoading, isSending, error, bootstrap, sendMessage } =
     useAiChat();
   const [draft, setDraft] = useState("");
-  const [started, setStarted] = useState(false);
+  const startedRef = useRef(false);
 
   useEffect(() => {
-    if (!started) {
-      setStarted(true);
+    if (!startedRef.current) {
+      startedRef.current = true;
       void bootstrap();
     }
-  }, [bootstrap, started]);
+  }, [bootstrap]);
 
   const handleSend = async () => {
     const text = draft.trim();

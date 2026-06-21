@@ -176,6 +176,11 @@ html.dark {
     html {
         @apply font-sans;
     }
+    html:has(.admin-dashboard),
+    body:has(.admin-dashboard) {
+        height: 100%;
+        overflow: hidden;
+    }
 }
 
 @layer utilities {

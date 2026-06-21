@@ -3,7 +3,7 @@
 import { LazyImage } from "@/components/product/LazyImage";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useAuth } from "@/features/auth";
 import { syncCartAfterOrder } from "@/features/cart/lib/sync-cart-after-order";
 import { useOrdersList } from "@/features/orders";
@@ -151,6 +151,14 @@ function AccountOrderCard({ order }: { order: Order }) {
   );
 }
 
+function useClientMounted() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
+
 interface AccountOrdersSectionProps {
   placedOrderCode?: string | null;
   highlightOrders?: boolean;
@@ -164,13 +172,9 @@ export function AccountOrdersSection({
   paymentPendingMessage = null,
   paymentFailedMessage = null,
 }: AccountOrdersSectionProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useClientMounted();
   const { isAuthenticated } = useAuth();
   const { orders, isLoading, error } = useOrdersList();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const visibleOrders = mounted && isAuthenticated ? orders : [];
   const visibleLoading = !mounted || (isAuthenticated && isLoading);

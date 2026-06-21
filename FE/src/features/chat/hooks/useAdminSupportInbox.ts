@@ -65,10 +65,16 @@ export function useAdminSupportInbox(
   const [error, setError] = useState<string | null>(null);
 
   const selectedIdRef = useRef(selectedId);
-  selectedIdRef.current = selectedId;
 
   const autoSelectRef = useRef(autoSelect);
-  autoSelectRef.current = autoSelect;
+
+  useEffect(() => {
+    selectedIdRef.current = selectedId;
+  }, [selectedId]);
+
+  useEffect(() => {
+    autoSelectRef.current = autoSelect;
+  }, [autoSelect]);
 
   const loadConversations = useCallback(
     async (options?: { silent?: boolean }) => {
@@ -139,21 +145,35 @@ export function useAdminSupportInbox(
   );
 
   const loadConversationsRef = useRef(loadConversations);
-  loadConversationsRef.current = loadConversations;
 
   const loadMessagesRef = useRef(loadMessages);
-  loadMessagesRef.current = loadMessages;
 
   useEffect(() => {
-    void loadConversations();
+    loadConversationsRef.current = loadConversations;
   }, [loadConversations]);
 
   useEffect(() => {
-    if (!selectedId) {
-      setMessages([]);
-      return;
-    }
-    void loadMessages(selectedId);
+    loadMessagesRef.current = loadMessages;
+  }, [loadMessages]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadConversations();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [loadConversations]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (!selectedId) {
+        setMessages([]);
+        return;
+      }
+      void loadMessages(selectedId);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [selectedId, loadMessages]);
 
   const { usingPolling, pollIntervalMs } = useSupportRealtime({

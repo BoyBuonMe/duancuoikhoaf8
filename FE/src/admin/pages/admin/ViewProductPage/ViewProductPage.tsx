@@ -59,6 +59,7 @@ export default function ViewProductPage({ product, onBack, onEdit }: Props) {
             </p>
             <div className="flex flex-wrap gap-3">
               {product.imageUrls.map((url, index) => (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   key={index}
                   src={url}

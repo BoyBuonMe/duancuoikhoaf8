@@ -8,6 +8,7 @@ import {
   sendPasswordResetEmail,
   sendVerificationEmail,
 } from "@/models/auth/email.service";
+import { createDashboardNotification } from "@/models/notifications/notifications.service";
 import {
   signAccessToken,
   signRefreshToken,
@@ -173,6 +174,22 @@ export async function register(
       name,
       authProvider: "local",
       emailVerified: false,
+    });
+
+    void createDashboardNotification({
+      type: "user_registered",
+      title: "Người dùng mới đăng ký",
+      message: `${user.email} vừa đăng ký tài khoản`,
+      metadata: {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    }).catch((err) => {
+      console.error(
+        `[notifications] Failed to create registration notification for ${user.email}:`,
+        err,
+      );
     });
 
     const devVerification = await issueEmailVerification(user);

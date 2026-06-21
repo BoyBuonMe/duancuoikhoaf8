@@ -188,6 +188,7 @@ export default function ProductsPage() {
                   >
                     <td className="px-4 py-3">
                       {product.imageUrls?.[0] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={product.imageUrls[0]}
                           alt={product.title}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useSyncExternalStore } from "react";
 import { AccountOrdersSectionWithParams } from "@/components/account/AccountOrdersSection";
 import { SignOutButton } from "@/components/account/SignOutButton";
 import { useAuth } from "@/features/auth";
@@ -139,14 +139,18 @@ function formatAccountDisplayName(user: AuthUser | null): string {
   return fromEmail ?? "";
 }
 
+function useClientMounted() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
+
 export function AccountPageClient() {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useClientMounted();
   const { user, sessionChecked } = useAuth();
   const { xp, xpGoal, tier } = mockUser;
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const name = formatAccountDisplayName(mounted ? user : null).toUpperCase();
   const showNameSkeleton = !mounted || (!name && !sessionChecked);
