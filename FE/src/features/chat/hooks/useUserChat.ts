@@ -45,12 +45,33 @@ export function useAiChat() {
     if (!conversation || !content.trim()) return;
     setIsSending(true);
     setError(null);
+  
+    // ✅ Hiện tin nhắn user NGAY trước khi gọi API
+    const optimisticMessage: ChatMessage = {
+      id: `temp-${Date.now()}`,
+      conversationId: conversation.id,
+      senderId: null,
+      senderRole: "user",
+      content: content.trim(),
+      createdAt: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, optimisticMessage]);
+  
     try {
       const result = await sendAiMessageApi(conversation.id, content.trim());
+      // ✅ Thay thế tin nhắn tạm bằng tin nhắn thật + thêm response AI
       setMessages((prev) =>
-        mergeMessage(mergeMessage(prev, result.userMessage), result.assistantMessage),
+        mergeMessage(
+          mergeMessage(
+            prev.filter((m) => m.id !== optimisticMessage.id), // xóa tin tạm
+            result.userMessage,
+          ),
+          result.assistantMessage,
+        ),
       );
     } catch (e) {
+      // ✅ Nếu lỗi thì xóa tin nhắn tạm đi
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticMessage.id));
       setError(e instanceof Error ? e.message : "Failed to send message");
     } finally {
       setIsSending(false);

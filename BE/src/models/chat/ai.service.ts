@@ -24,12 +24,10 @@ export async function generateAiReply(
   if (!apiKey) {
     return (
       `[${STORE_NAME}]\n` +
-      "Hê thống đang bận. Liên hệ support để nói chuyện với admin.\n\n"
+      "Hệ thống đang bận. Liên hệ support để nói chuyện với admin.\n\n"
     );
   }
 
-  // Retrieve live price/stock for the products this message is about and
-  // ground the assistant in real catalog data (lightweight RAG).
   let productContext = "";
   try {
     productContext = await buildProductContext(userMessage);
@@ -43,43 +41,59 @@ export async function generateAiReply(
     ? `${SYSTEM_PROMPT}\n\n${productContext}`
     : SYSTEM_PROMPT;
 
-  const messages = [
-    { role: "system" as const, content: systemContent },
+  const contents = [
     ...history.slice(-10).map((m) => ({
-      role: m.role,
-      content: m.content,
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
     })),
-    { role: "user" as const, content: userMessage },
+    { role: "user", parts: [{ text: userMessage }] },
   ];
 
-  const response = await fetch("https://capi.aerolink.lat/", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${process.env.OPENAI_MODEL}:generateContent`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: systemContent }],
+        },
+        contents,
+      }),
     },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL ?? "anthropic/claude-opus-4.8",
-      messages,
-      max_tokens: 600,
-      temperature: 0.6,
-    }),
-  });
+  );
+
+  async function fetchWithRetry(
+    url: string,
+    options: RequestInit,
+    retries = 3,
+  ): Promise<Response> {
+    for (let i = 0; i < retries; i++) {
+      const res = await fetch(url, options);
+      if (res.status !== 503) return res;
+      if (i < retries - 1)
+        await new Promise((r) => setTimeout(r, 1000 * (i + 1))); // chờ 1s, 2s, 3s
+    }
+    throw new Error("Gemini API unavailable after retries");
+  }
 
   if (!response.ok) {
     const errText = await response.text();
-    throw new Error(
-      `OpenAI error ${response.status}: ${errText.slice(0, 200)}`,
-    );
+    throw new Error(`AI error ${response.status}: ${errText.slice(0, 200)}`);
   }
 
   const data = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
+    candidates?: Array<{
+      content?: { parts?: Array<{ text?: string }> };
+    }>;
   };
 
-  const reply = data.choices?.[0]?.message?.content?.trim();
+  const reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
   if (!reply) {
-    throw new Error("Empty response from OpenAI");
+    throw new Error("Empty response from Gemini");
   }
 
   return reply;

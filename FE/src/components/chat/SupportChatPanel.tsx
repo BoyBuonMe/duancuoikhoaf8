@@ -23,15 +23,14 @@ export function SupportChatPanel() {
     sendMessage,
   } = useUserSupportChat();
   const [draft, setDraft] = useState("");
-  const [started, setStarted] = useState(false);
+  const startedRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!started) {
-      setStarted(true);
-      void bootstrap();
-    }
-  }, [bootstrap, started]);
+    if (startedRef.current) return;
+    startedRef.current = true;
+    void bootstrap();
+  }, [bootstrap]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

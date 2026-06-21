@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, X } from "lucide-react";
-import { useAuth } from "@/features/auth";
 import { useAiChat } from "@/features/chat";
 import type { ChatMessage } from "@/features/chat/types/chat.types";
+import { AiMessageContent } from "@/components/chat/AiMessageContent";
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString("vi-VN", {
@@ -38,15 +37,19 @@ function ChatMessageList({ messages }: { messages: ChatMessage[] }) {
             className={`flex ${isUser ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[90%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
+              className={`max-w-[90%] rounded-2xl px-3.5 py-2.5 text-sm ${
                 isUser
                   ? "bg-zinc-900 text-white"
                   : "bg-zinc-100 text-zinc-900"
               }`}
             >
-              {message.content}
+              {isUser ? (
+                <span className="whitespace-pre-wrap">{message.content}</span>
+              ) : (
+                <AiMessageContent content={message.content} />
+              )}
               <p
-                className={`mt-1 text-[10px] ${isUser ? "text-zinc-400" : "text-zinc-500"}`}
+                className={`mt-1.5 text-[10px] ${isUser ? "text-zinc-400" : "text-zinc-500"}`}
               >
                 {formatTime(message.createdAt)}
               </p>
@@ -63,14 +66,13 @@ export function AiChatPanel() {
   const { messages, isLoading, isSending, error, bootstrap, sendMessage } =
     useAiChat();
   const [draft, setDraft] = useState("");
-  const [started, setStarted] = useState(false);
+  const startedRef = useRef(false);
 
   useEffect(() => {
-    if (!started) {
-      setStarted(true);
-      void bootstrap();
-    }
-  }, [bootstrap, started]);
+    if (startedRef.current) return;
+    startedRef.current = true;
+    void bootstrap();
+  }, [bootstrap]);
 
   const handleSend = async () => {
     const text = draft.trim();

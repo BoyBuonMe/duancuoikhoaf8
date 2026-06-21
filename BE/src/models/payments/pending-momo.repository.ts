@@ -28,6 +28,6 @@ export async function markPendingMomoPaymentCompleted(
   return PendingMomoPayment.findOneAndUpdate(
     { momoOrderId: momoOrderId.toUpperCase(), status: "pending" },
     { $set: { status: "completed", orderCode: orderCode.toUpperCase() } },
-    { new: true },
+    { returnDocument: 'after' },
   ).lean();
 }

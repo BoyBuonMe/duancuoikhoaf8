@@ -37,7 +37,7 @@ export async function updateOrderPayment(
   return Order.findOneAndUpdate(
     { orderCode: orderCode.toUpperCase() },
     { $set: update },
-    { new: true },
+    { returnDocument: 'after' },
   ).lean();
 }
 
@@ -48,6 +48,6 @@ export async function setOrderMomoOrderId(
   return Order.findOneAndUpdate(
     { orderCode: orderCode.toUpperCase() },
     { $set: { momoOrderId } },
-    { new: true },
+    { returnDocument: 'after' },
   ).lean();
 }

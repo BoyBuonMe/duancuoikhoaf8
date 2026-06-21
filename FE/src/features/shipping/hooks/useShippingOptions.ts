@@ -46,10 +46,7 @@ export function useShippingOptions(input: UseShippingOptionsInput) {
   const requestKey = buildRequestKey(input);
 
   useEffect(() => {
-    if (!requestKey) {
-      setData(EMPTY);
-      return;
-    }
+    if (!requestKey) return;
 
     let cancelled = false;
 

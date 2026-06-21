@@ -53,7 +53,7 @@ export function LoginForm() {
       setSession(user, token);
       toast.success(`Welcome back, ${user.name || "User"}!`);
       if (isDashboardUser(user)) {
-        window.location.href = adminDashboardUrl();
+        window.location.assign(adminDashboardUrl());
         return;
       }
       router.push("/account");

@@ -19,6 +19,7 @@
     "init:chat-collections": "tsx scripts/init-chat-collections.ts",
     "soketi": "docker compose -f ../docker-compose.yml up soketi",
     "soketi:detach": "docker compose -f ../docker-compose.yml up soketi -d",
+    "soketi:local": "soketi start",
     "test:soketi": "tsx scripts/test-soketi.ts",
     "test:momo": "tsx scripts/test-momo-create.ts",
     "test:momo:return": "tsx scripts/test-momo-return.ts",
@@ -50,6 +51,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@soketi/soketi": "^1.6.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",

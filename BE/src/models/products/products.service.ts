@@ -162,20 +162,29 @@ export async function getProductRatingStats(productId: string) {
   ]);
 
   return {
-    ratingAverage: stats[0]?.ratingAverage ? Math.round(stats[0].ratingAverage * 10) / 10 : 0,
+    ratingAverage: stats[0]?.ratingAverage
+      ? Math.round(stats[0].ratingAverage * 10) / 10
+      : 0,
     ratingCount: stats[0]?.ratingCount ?? 0,
   };
 }
 
-export async function rateProduct(productId: string, userId: string, rating: number) {
+export async function rateProduct(
+  productId: string,
+  userId: string,
+  rating: number,
+) {
   if (rating < 1 || rating > 5) {
     throw httpError("Rating must be between 1 and 5", 400);
   }
 
   await ProductRating.findOneAndUpdate(
-    { productId: new mongoose.Types.ObjectId(productId), userId: new mongoose.Types.ObjectId(userId) },
+    {
+      productId: new mongoose.Types.ObjectId(productId),
+      userId: new mongoose.Types.ObjectId(userId),
+    },
     { rating },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: "after" },
   );
 
   return getProductRatingStats(productId);

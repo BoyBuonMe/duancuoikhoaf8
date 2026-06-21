@@ -55,7 +55,9 @@ export function useSupportRealtime({
   onConversationUpdated,
   onConversationDeleted,
 }: UseSupportRealtimeOptions) {
-  const [usingPolling, setUsingPolling] = useState(!isPusherConfigured());
+  const [pusherConnected, setPusherConnected] = useState(false);
+  const usingPolling =
+    !enabled || !isPusherConfigured() || !pusherConnected;
   const pusherRef = useRef<Pusher | null>(null);
   const onMessageRef = useRef(onMessage);
   const onConversationUpdatedRef = useRef(onConversationUpdated);
@@ -74,21 +76,19 @@ export function useSupportRealtime({
   }, [onConversationDeleted]);
 
   useEffect(() => {
-    if (!enabled || !isPusherConfigured()) {
-      setUsingPolling(true);
-      return;
-    }
+    if (!enabled || !isPusherConfigured()) return;
 
     const pusher = createPusherClient();
     pusherRef.current = pusher;
 
-    pusher.connection.bind("connected", () => setUsingPolling(false));
-    pusher.connection.bind("unavailable", () => setUsingPolling(true));
-    pusher.connection.bind("failed", () => setUsingPolling(true));
+    pusher.connection.bind("connected", () => setPusherConnected(true));
+    pusher.connection.bind("unavailable", () => setPusherConnected(false));
+    pusher.connection.bind("failed", () => setPusherConnected(false));
 
     return () => {
       pusher.disconnect();
       pusherRef.current = null;
+      setPusherConnected(false);
     };
   }, [enabled]);
 

@@ -15,6 +15,8 @@ import type {
 } from "@/features/chat/types/chat.types";
 import { useSupportRealtime } from "@/features/chat/hooks/useSupportRealtime";
 
+const EMPTY_MESSAGES: ChatMessage[] = [];
+
 function mergeMessage(list: ChatMessage[], incoming: ChatMessage) {
   if (list.some((m) => m.id === incoming.id)) return list;
   return [...list, incoming].sort(
@@ -59,30 +61,32 @@ export function useAdminSupportInbox(
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => new Set());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoadingList, setIsLoadingList] = useState(true);
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [loadedFilter, setLoadedFilter] = useState<
+    ConversationStatus | "all" | null
+  >(null);
+  const [loadedMessagesId, setLoadedMessagesId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedIdRef = useRef(selectedId);
-  selectedIdRef.current = selectedId;
+  // Loading flags are derived (not stored) so we never call setState
+  // synchronously inside the data-loading effects below.
+  const isLoadingList = loadedFilter !== statusFilter;
+  const isLoadingMessages =
+    selectedId != null && loadedMessagesId !== selectedId;
 
+  const selectedIdRef = useRef(selectedId);
   const autoSelectRef = useRef(autoSelect);
-  autoSelectRef.current = autoSelect;
 
   const loadConversations = useCallback(
     async (options?: { silent?: boolean }) => {
       const silent = options?.silent ?? false;
-      if (!silent) {
-        setIsLoadingList(true);
-        setError(null);
-      }
 
       try {
         const status = statusFilter === "all" ? undefined : statusFilter;
         const { conversations: rows } = await listSupportConversationsApi(status);
 
         setConversations((prev) => (conversationsEqual(prev, rows) ? prev : rows));
+        if (!silent) setError(null);
 
         const currentSelectedId = selectedIdRef.current;
         if (autoSelectRef.current) {
@@ -107,9 +111,7 @@ export function useAdminSupportInbox(
           );
         }
       } finally {
-        if (!silent) {
-          setIsLoadingList(false);
-        }
+        setLoadedFilter(statusFilter);
       }
     },
     [statusFilter],
@@ -118,9 +120,6 @@ export function useAdminSupportInbox(
   const loadMessages = useCallback(
     async (conversationId: string, options?: { silent?: boolean }) => {
       const silent = options?.silent ?? false;
-      if (!silent) {
-        setIsLoadingMessages(true);
-      }
 
       try {
         const { messages: rows } = await listSupportMessagesApi(conversationId);
@@ -130,31 +129,37 @@ export function useAdminSupportInbox(
           setError(e instanceof Error ? e.message : "Failed to load messages");
         }
       } finally {
-        if (!silent) {
-          setIsLoadingMessages(false);
-        }
+        setLoadedMessagesId(conversationId);
       }
     },
     [],
   );
 
   const loadConversationsRef = useRef(loadConversations);
-  loadConversationsRef.current = loadConversations;
-
   const loadMessagesRef = useRef(loadMessages);
-  loadMessagesRef.current = loadMessages;
+
+  // Keep "latest value" refs current after each commit, instead of writing
+  // them during render (which React's rules of hooks disallows).
+  useEffect(() => {
+    selectedIdRef.current = selectedId;
+    autoSelectRef.current = autoSelect;
+    loadConversationsRef.current = loadConversations;
+    loadMessagesRef.current = loadMessages;
+  });
+
+  // Reload the list whenever the status filter changes. setState happens
+  // asynchronously after the request resolves (inside loadConversations), so
+  // it's an async callback update, not a synchronous cascade — we call through
+  // the ref (same pattern as the polling effects below) so the effect only
+  // re-runs on statusFilter.
+  useEffect(() => {
+    void loadConversationsRef.current();
+  }, [statusFilter]);
 
   useEffect(() => {
-    void loadConversations();
-  }, [loadConversations]);
-
-  useEffect(() => {
-    if (!selectedId) {
-      setMessages([]);
-      return;
-    }
-    void loadMessages(selectedId);
-  }, [selectedId, loadMessages]);
+    if (!selectedId) return;
+    void loadMessagesRef.current(selectedId);
+  }, [selectedId]);
 
   const { usingPolling, pollIntervalMs } = useSupportRealtime({
     conversationId: selectedId,
@@ -268,7 +273,7 @@ export function useAdminSupportInbox(
     selectedId,
     setSelectedId,
     selectedConversation,
-    messages,
+    messages: selectedId ? messages : EMPTY_MESSAGES,
     isLoadingList,
     isLoadingMessages,
     isSending,
