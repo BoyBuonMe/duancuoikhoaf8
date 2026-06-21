@@ -16,7 +16,7 @@ const initialState: AuthState = {
 
 /**
  * Auth slice keeps the current user in memory while the access token
- * lives in localStorage (set/read through the shared http client).
+ * lives in module memory (set/read through the shared http client).
  * The refresh token is an httpOnly cookie managed by the BE.
  *
  * Intentionally NOT persisted: rehydration of the user happens by
@@ -41,6 +41,11 @@ const authSlice = createSlice({
     setSessionChecked(state, action: PayloadAction<boolean>) {
       state.sessionChecked = action.payload;
     },
+    setGuestSession(state) {
+      writeAccessToken(null);
+      state.user = null;
+      state.sessionChecked = true;
+    },
     clearSession(state) {
       writeAccessToken(null);
       state.user = null;
@@ -49,6 +54,11 @@ const authSlice = createSlice({
   },
 });
 
-export const { setSession, setUser, setSessionChecked, clearSession } =
-  authSlice.actions;
+export const {
+  setSession,
+  setUser,
+  setSessionChecked,
+  setGuestSession,
+  clearSession,
+} = authSlice.actions;
 export const authReducer = authSlice.reducer;

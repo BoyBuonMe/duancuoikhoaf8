@@ -5,7 +5,8 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 
-const ACCESS_TOKEN_STORAGE_KEY = "accessToken";
+const LEGACY_ACCESS_TOKEN_STORAGE_KEY = "accessToken";
+const AUTH_SESSION_COOKIE = "authSession";
 const REFRESH_PATH = "/auth/refresh";
 const REFRESH_EXCLUDED_PATHS = [
   REFRESH_PATH,
@@ -22,18 +23,27 @@ type RetriableConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
 };
 
+let accessToken: string | null = null;
+
+function removeLegacyStoredAccessToken(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(LEGACY_ACCESS_TOKEN_STORAGE_KEY);
+}
+
 function readAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+  return accessToken;
+}
+
+function hasAuthSessionHint(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie
+    .split(";")
+    .some((cookie) => cookie.trim().startsWith(`${AUTH_SESSION_COOKIE}=`));
 }
 
 function writeAccessToken(token: string | null): void {
-  if (typeof window === "undefined") return;
-  if (token) {
-    window.localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
-  } else {
-    window.localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
-  }
+  accessToken = token;
+  removeLegacyStoredAccessToken();
 }
 
 const httpClient: AxiosInstance = axios.create({
@@ -155,8 +165,9 @@ const del = async <T>(
 const http = { get, post, put, patch, del };
 export default http;
 export {
-  ACCESS_TOKEN_STORAGE_KEY,
+  hasAuthSessionHint,
   httpClient,
   readAccessToken,
+  refreshAccessToken,
   writeAccessToken,
 };

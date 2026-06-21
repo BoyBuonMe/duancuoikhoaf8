@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/admin/hooks/hooks";
 import { logout } from "@/admin/features/auth/authSlice";
 import { getCurrentUser } from "@/admin/services/auth/authService";
+import { logoutApi } from "@/features/auth/api/auth.api";
 import {
   ChevronRight,
   LayoutDashboard,
@@ -56,9 +57,13 @@ export default function AdminSidebar({
     dispatch(getCurrentUser());
   }, [dispatch]);
 
-  function handleLogout() {
-    dispatch(logout());
-    window.location.assign("/account/login");
+  async function handleLogout() {
+    try {
+      await logoutApi();
+    } finally {
+      dispatch(logout());
+      window.location.assign("/account/login");
+    }
   }
 
   const displayName = user?.name || user?.email?.split("@")[0] || "Tài khoản";

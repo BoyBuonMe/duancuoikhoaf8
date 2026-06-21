@@ -6,7 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import {
@@ -23,21 +23,65 @@ type ThemeContextValue = {
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
+const THEME_CHANGE_EVENT = "store-theme-change";
+const SYSTEM_DARK_QUERY = "(prefers-color-scheme: dark)";
+
+function getServerThemeSnapshot(): ThemeMode {
+  return "system";
+}
+
+function getStoredThemeSnapshot(): ThemeMode {
+  if (typeof window === "undefined") return getServerThemeSnapshot();
+  return readStoredTheme();
+}
+
+function subscribeStoredTheme(onChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+
+  const handler = () => onChange();
+  window.addEventListener("storage", handler);
+  window.addEventListener(THEME_CHANGE_EVENT, handler);
+
+  return () => {
+    window.removeEventListener("storage", handler);
+    window.removeEventListener(THEME_CHANGE_EVENT, handler);
+  };
+}
+
+function getServerSystemDarkSnapshot(): boolean {
+  return false;
+}
+
+function getSystemDarkSnapshot(): boolean {
+  if (typeof window === "undefined") return getServerSystemDarkSnapshot();
+  return window.matchMedia(SYSTEM_DARK_QUERY).matches;
+}
+
+function subscribeSystemDark(onChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+
+  const media = window.matchMedia(SYSTEM_DARK_QUERY);
+  media.addEventListener("change", onChange);
+
+  return () => media.removeEventListener("change", onChange);
+}
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>(() => {
-    if (typeof window === "undefined") return "system";
-    return readStoredTheme();
-  });
-  const [systemDark, setSystemDark] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
+  const theme = useSyncExternalStore(
+    subscribeStoredTheme,
+    getStoredThemeSnapshot,
+    getServerThemeSnapshot,
+  );
+  const systemDark = useSyncExternalStore(
+    subscribeSystemDark,
+    getSystemDarkSnapshot,
+    getServerSystemDarkSnapshot,
+  );
 
   const setTheme = useCallback((mode: ThemeMode) => {
-    setThemeState(mode);
     try {
       localStorage.setItem(THEME_STORAGE_KEY, mode);
+      window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
     } catch {
       /* ignore */
     }
@@ -46,19 +90,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     applyThemeToDocument(theme);
-  }, [theme]);
-
-  useEffect(() => {
-    if (theme !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => {
-      setSystemDark(mq.matches);
-      applyThemeToDocument("system");
-    };
-    onChange();
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, [theme]);
+  }, [theme, systemDark]);
 
   const resolvedDark = useMemo(() => {
     if (theme === "dark") return true;

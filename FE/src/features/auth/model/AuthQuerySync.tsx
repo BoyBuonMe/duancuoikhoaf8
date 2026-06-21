@@ -1,41 +1,56 @@
 "use client";
 
 import { useEffect } from "react";
-import { useGetMeQuery } from "@/features/auth/api/auth.query.api";
+import { useLazyGetMeQuery } from "@/features/auth/api/auth.query.api";
 import {
-  clearSession,
-  setSessionChecked,
+  setGuestSession,
   setUser,
 } from "@/features/auth/model/auth.slice";
 import { useHasHydrated } from "@/shared/hooks/useHasHydrated";
 import { useAppDispatch } from "@/store/hooks";
+import {
+  hasAuthSessionHint,
+  readAccessToken,
+  refreshAccessToken,
+} from "@/utils/http";
 
-/** Sync RTK Query /users/me into the auth slice after client hydration. */
+/** Resolve the memory access token first, then sync /users/me into auth state. */
 export function AuthQuerySync() {
   const dispatch = useAppDispatch();
   const hasHydrated = useHasHydrated();
-  const { data, isError, isSuccess, isFetching } = useGetMeQuery(undefined, {
-    skip: !hasHydrated,
-    refetchOnMountOrArgChange: true,
-  });
+  const [getMe] = useLazyGetMeQuery();
 
   useEffect(() => {
-    if (!hasHydrated || isFetching) return;
+    if (!hasHydrated) return;
 
-    if (isSuccess && data) {
-      dispatch(setUser(data));
-      return;
+    let cancelled = false;
+
+    async function syncSession() {
+      const token =
+        readAccessToken() ??
+        (hasAuthSessionHint() ? await refreshAccessToken() : null);
+
+      if (cancelled) return;
+
+      if (!token) {
+        dispatch(setGuestSession());
+        return;
+      }
+
+      try {
+        const user = await getMe(undefined, true).unwrap();
+        if (!cancelled) dispatch(setUser(user));
+      } catch {
+        if (!cancelled) dispatch(setGuestSession());
+      }
     }
 
-    if (isError) {
-      dispatch(clearSession());
-      return;
-    }
+    void syncSession();
 
-    if (isSuccess && !data) {
-      dispatch(setSessionChecked(true));
-    }
-  }, [hasHydrated, isFetching, isSuccess, isError, data, dispatch]);
+    return () => {
+      cancelled = true;
+    };
+  }, [hasHydrated, dispatch, getMe]);
 
   return null;
 }
