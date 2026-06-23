@@ -12,6 +12,7 @@ import type {
 import ViewUserPage from "../ViewUserPage/ViewUserPage";
 import EditUserPage from "../EditUserPage/EditUserPage";
 import DeleteUserModal from "../DeleteUserModal/DeleteUserModal";
+import { Search, UserCheck, UserRound, Users, UserX } from "lucide-react";
 
 type ViewMode = "list" | "view" | "edit" | "delete";
 
@@ -28,8 +29,8 @@ const ROLE_COLORS: Record<UserRole, string> = {
 };
 
 const STATUS_LABELS: Record<UserStatus, string> = {
-  active: "Hoat dong",
-  blocked: "Bi khoa",
+  active: "Hoạt động",
+  blocked: "Bị khóa",
 };
 
 const STATUS_COLORS: Record<UserStatus, string> = {
@@ -123,56 +124,63 @@ export default function UsersPage() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
           {
             label: "Tổng người dùng",
             value: users.length,
             color: "bg-indigo-50 text-indigo-700",
-            icon: "👥",
+            icon: Users,
           },
           {
             label: "Hoạt động",
             value: users.filter((u) => u.status === "active").length,
             color: "bg-green-50 text-green-700",
-            icon: "✅",
+            icon: UserCheck,
           },
           {
             label: "Bị khóa",
             value: users.filter((u) => u.status === "blocked").length,
             color: "bg-red-50 text-red-700",
-            icon: "🚫",
+            icon: UserX,
           },
           {
             label: "Người dùng",
             value: users.filter((u) => u.role === "user").length,
             color: "bg-blue-50 text-blue-700",
-            icon: "🛍️",
+            icon: UserRound,
           },
-        ].map((s, i) => (
-          <div
-            key={s.label}
-            className={`${s.color} rounded-2xl p-4 flex items-center gap-3 animate-card-in`}
-            style={{ animationDelay: `${i * 60}ms` }}
-          >
-            <span className="text-2xl">{s.icon}</span>
-            <div>
-              <p className="text-2xl font-bold">{s.value}</p>
-              <p className="text-xs font-medium opacity-75">{s.label}</p>
+        ].map((s, i) => {
+          const Icon = s.icon;
+
+          return (
+            <div
+              key={s.label}
+              className={`${s.color} rounded-lg p-4 flex items-center gap-3 animate-card-in`}
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/70 shadow-sm">
+                <Icon size={21} strokeWidth={2.2} />
+              </span>
+              <div>
+                <p className="text-2xl font-bold">{s.value}</p>
+                <p className="text-xs font-medium opacity-75">{s.label}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div className="flex flex-wrap gap-3">
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              🔍
-            </span>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className="relative w-full sm:w-auto">
+            <Search
+              size={17}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            />
             <input
-              className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-64 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 sm:w-72"
               placeholder="Tìm tên, email, số điện thoại..."
               value={search}
               onChange={(e) => {
@@ -182,7 +190,7 @@ export default function UsersPage() {
             />
           </div>
           <select
-            className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 sm:w-auto"
             value={roleFilter}
             onChange={(e) => {
               setRoleFilter(e.target.value as "all" | UserRole);
@@ -197,7 +205,7 @@ export default function UsersPage() {
             ))}
           </select>
           <select
-            className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 sm:w-auto"
             value={statusFilter}
             onChange={(e) => {
               setStatusFilter(e.target.value as "all" | UserStatus);
@@ -326,13 +334,13 @@ export default function UsersPage() {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+        <div className="flex flex-col gap-3 border-t border-gray-100 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-gray-500">
             Hiển thị {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–
             {Math.min(page * PAGE_SIZE, filtered.length)} / {filtered.length}{" "}
             người dùng
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}

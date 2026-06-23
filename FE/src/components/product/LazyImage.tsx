@@ -18,6 +18,7 @@ export function LazyImage({
   className,
   fill,
   priority,
+  alt,
   ...props
 }: LazyImageProps) {
   const { ref, inView } = useInView({ rootMargin, once: true });
@@ -29,6 +30,7 @@ export function LazyImage({
         {shouldLoad ? (
           <Image
             fill
+            alt={alt}
             className={className}
             priority={Boolean(eager && priority)}
             {...props}
@@ -50,6 +52,7 @@ export function LazyImage({
     <div ref={ref} className="relative">
       {shouldLoad ? (
         <Image
+          alt={alt}
           className={className}
           priority={Boolean(eager && priority)}
           {...props}

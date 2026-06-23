@@ -6,6 +6,7 @@ import {
 } from "@/middlewares/auth.middleware";
 import { validate } from "@/middlewares/validate.middleware";
 import * as adminController from "@/models/admin/admin.controller";
+import * as notificationsController from "@/models/notifications/notifications.controller";
 import {
   adminImageUpload,
   handleAdminImageUploadError,
@@ -35,6 +36,16 @@ import {
 const router = Router();
 
 router.use(requireAuth, requireAdmin);
+
+router.get("/notifications", notificationsController.listNotifications);
+router.patch(
+  "/notifications/read-all",
+  notificationsController.markAllRead,
+);
+router.patch(
+  "/notifications/:id/read",
+  notificationsController.markRead,
+);
 
 router.get(
   "/users",

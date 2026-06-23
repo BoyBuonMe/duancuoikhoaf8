@@ -18,12 +18,22 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+import {
+  Area,
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 const STATUS_LABELS = {
-  pending: "Cho xu ly",
-  shipping: "Dang giao",
-  delivered: "Da giao",
-  cancelled: "Da huy",
+  pending: "Chờ xử lý",
+  shipping: "Đang giao",
+  delivered: "Đã giao",
+  cancelled: "Đã hủy",
 } as const;
 
 const toneClass: Record<string, string> = {
@@ -38,6 +48,14 @@ const PRODUCT_FETCH_LIMIT = 1000;
 function formatPrice(amount: number, currency = "USD") {
   if (!Number.isFinite(amount)) return `0 ${currency}`;
   return amount.toLocaleString("vi-VN") + " " + currency;
+}
+
+function formatCompactPrice(amount: number, currency = "USD") {
+  if (!Number.isFinite(amount)) return `0 ${currency}`;
+  return new Intl.NumberFormat("vi-VN", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(amount) + ` ${currency}`;
 }
 
 function formatDate(iso?: string) {
@@ -156,11 +174,11 @@ function getCustomerName(order: Order) {
       order.customer?.name,
       order.user?.name,
       email.split("@")[0],
-    ].find(Boolean) || "Khach hang"
+    ].find(Boolean) || "Khách hàng"
   );
 }
 
-function buildRevenueBars(orders: Order[]) {
+function buildRevenueChartData(orders: Order[]) {
   const days = Array.from({ length: 7 }, (_, index) => {
     const date = new Date();
     date.setHours(0, 0, 0, 0);
@@ -168,21 +186,26 @@ function buildRevenueBars(orders: Order[]) {
     return date;
   });
 
-  const values = days.map((day) => {
+  return days.map((day) => {
     const nextDay = new Date(day);
     nextDay.setDate(day.getDate() + 1);
 
-    return orders
-      .filter((order) => {
+    const dailyOrders = orders.filter((order) => {
         if (!order.createdAt) return false;
         const createdAt = new Date(order.createdAt);
         return createdAt >= day && createdAt < nextDay;
-      })
-      .reduce((sum, order) => sum + getOrderTotal(order), 0);
-  });
+      });
 
-  const max = Math.max(...values, 1);
-  return values.map((value) => Math.max(8, Math.round((value / max) * 100)));
+    return {
+      date: day.toISOString(),
+      label: day.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+      }),
+      revenue: dailyOrders.reduce((sum, order) => sum + getOrderTotal(order), 0),
+      orderCount: dailyOrders.length,
+    };
+  });
 }
 
 export default function DashboardOverview() {
@@ -228,38 +251,38 @@ export default function DashboardOverview() {
       averageOrder,
       recentOrders,
       recentProducts,
-      chartPoints: buildRevenueBars(orders),
+      chartData: buildRevenueChartData(orders),
     };
   }, [orders, products, users]);
 
   const stats = [
     {
-      label: "Tong doanh thu",
+      label: "Tổng doanh thu",
       value: ordersLoading
         ? "..."
         : formatPrice(dashboardData.revenue, dashboardData.currency),
-      change: `${orders.length} don`,
+      change: `${orders.length} đơn`,
       icon: Wallet,
       color: "violet",
     },
     {
-      label: "Don hang",
+      label: "Đơn hàng",
       value: ordersLoading ? "..." : String(totalOrders || orders.length),
-      change: `${dashboardData.deliveredOrders} da giao`,
+      change: `${dashboardData.deliveredOrders} đã giao`,
       icon: ShoppingCart,
       color: "emerald",
     },
     {
-      label: "Nguoi dung",
+      label: "Người dùng",
       value: usersLoading ? "..." : String(users.length),
       change: `${dashboardData.activeUsers} active`,
       icon: Users,
       color: "sky",
     },
     {
-      label: "San pham",
+      label: "Sản phẩm",
       value: productsLoading ? "..." : String(totalProducts || products.length),
-      change: `${products.length} da tai`,
+      change: `${products.length} đã tải`,
       icon: Package,
       color: "amber",
     },
@@ -284,35 +307,87 @@ export default function DashboardOverview() {
                 </p>
                 <p className="mb-1 flex items-center gap-1 text-sm font-medium text-emerald-600">
                   <ArrowUpRight size={15} />
-                  Tong tu {orders.length} don hang
+                  Tổng từ {orders.length} đơn hàng
                 </p>
               </div>
             </div>
             <span className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm">
-              Du lieu that
+              Dữ liệu thật
             </span>
           </div>
-          <div className="relative h-64 rounded-xl bg-gradient-to-b from-violet-50 to-white px-4 py-5">
-            <div className="absolute inset-x-4 top-1/2 border-t border-dashed border-violet-200" />
-            <div className="absolute inset-x-4 top-1/4 border-t border-dashed border-violet-100" />
-            <div className="absolute inset-x-4 top-3/4 border-t border-dashed border-violet-100" />
-            <div className="relative flex h-full items-end gap-3">
-              {dashboardData.chartPoints.map((point, index) => (
-                <div key={index} className="flex flex-1 items-end">
-                  <div
-                    className="w-full rounded-t-xl bg-gradient-to-t from-violet-500/70 to-violet-300/80 shadow-[0_8px_24px_rgba(124,58,237,0.18)] transition-all duration-500 hover:from-violet-600"
-                    style={{ height: `${point}%` }}
-                  />
-                </div>
-              ))}
-            </div>
+          <div className="h-64 rounded-xl bg-gradient-to-b from-violet-50 to-white px-2 py-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart
+                data={dashboardData.chartData}
+                margin={{ top: 8, right: 12, bottom: 0, left: 0 }}
+              >
+                <defs>
+                  <linearGradient id="revenueFill" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.36} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="#e9d5ff" strokeDasharray="4 4" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#64748b", fontSize: 12 }}
+                  dy={8}
+                />
+                <YAxis
+                  yAxisId="revenue"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#64748b", fontSize: 12 }}
+                  tickFormatter={(value) =>
+                    formatCompactPrice(Number(value), dashboardData.currency)
+                  }
+                  width={58}
+                />
+                <YAxis yAxisId="orders" hide />
+                <Tooltip
+                  cursor={{ stroke: "#8b5cf6", strokeWidth: 1, strokeDasharray: "4 4" }}
+                  contentStyle={{
+                    border: "1px solid #e2e8f0",
+                    borderRadius: 8,
+                    boxShadow: "0 10px 30px rgba(15, 23, 42, 0.12)",
+                  }}
+                  formatter={(value, name) => {
+                    if (name === "revenue") {
+                      return [formatPrice(Number(value), dashboardData.currency), "Doanh thu"];
+                    }
+                    return [`${Number(value)} đơn`, "Số đơn"];
+                  }}
+                  labelFormatter={(label) => `Ngày ${label}`}
+                />
+                <Area
+                  yAxisId="revenue"
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#7c3aed"
+                  strokeWidth={3}
+                  fill="url(#revenueFill)"
+                  dot={{ r: 3, fill: "#7c3aed", strokeWidth: 0 }}
+                  activeDot={{ r: 5, fill: "#6d28d9", stroke: "#ffffff", strokeWidth: 2 }}
+                />
+                <Bar
+                  yAxisId="orders"
+                  dataKey="orderCount"
+                  barSize={14}
+                  fill="#a78bfa"
+                  opacity={0.32}
+                  radius={[6, 6, 0, 0]}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <MiniStat label="Tong don" value={String(orders.length)} />
-            <MiniStat label="Da giao" value={String(dashboardData.deliveredOrders)} />
-            <MiniStat label="Da huy" value={String(dashboardData.cancelledOrders)} down />
+            <MiniStat label="Tổng đơn" value={String(orders.length)} />
+            <MiniStat label="Đã giao" value={String(dashboardData.deliveredOrders)} />
+            <MiniStat label="Đã hủy" value={String(dashboardData.cancelledOrders)} down />
             <MiniStat
-              label="Gia tri TB"
+              label="Giá trị TB"
               value={formatPrice(dashboardData.averageOrder, dashboardData.currency)}
             />
           </div>
@@ -320,12 +395,12 @@ export default function DashboardOverview() {
 
         <section className="dashboard-card overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h2 className="text-base font-bold text-slate-950">Don hang gan day</h2>
+            <h2 className="text-base font-bold text-slate-950">Đơn hàng gần đây</h2>
           </div>
           <div className="divide-y divide-slate-100">
             {dashboardData.recentOrders.length === 0 ? (
               <div className="px-6 py-12 text-center text-sm text-slate-400">
-                Chua co don hang
+                Chưa có đơn hàng
               </div>
             ) : (
               dashboardData.recentOrders.map((order) => {
@@ -367,12 +442,12 @@ export default function DashboardOverview() {
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.15fr_1fr]">
         <section className="dashboard-card overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h2 className="text-base font-bold text-slate-950">San pham moi nhat</h2>
+            <h2 className="text-base font-bold text-slate-950">Sản phẩm mới nhất</h2>
           </div>
           <div className="divide-y divide-slate-100">
             {dashboardData.recentProducts.length === 0 ? (
               <div className="px-6 py-12 text-center text-sm text-slate-400">
-                Chua co san pham
+                Chưa có sản phẩm
               </div>
             ) : (
               dashboardData.recentProducts.map((product, index) => (
@@ -380,6 +455,7 @@ export default function DashboardOverview() {
                   <p className="text-sm font-bold text-slate-400">#{index + 1}</p>
                   <div className="flex min-w-0 items-center gap-3">
                     {getProductImage(product) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={getProductImage(product)}
                         alt={product.title}
@@ -405,12 +481,12 @@ export default function DashboardOverview() {
         </section>
 
         <section className="dashboard-card p-6">
-          <h2 className="mb-4 text-base font-bold text-slate-950">Thong ke nhanh</h2>
+          <h2 className="mb-4 text-base font-bold text-slate-950">Thống kê nhanh</h2>
           <div className="space-y-1">
-            <QuickStat icon={BarChart3} label="Don da giao" value={String(dashboardData.deliveredOrders)} change="real" up />
-            <QuickStat icon={ShoppingCart} label="Gia tri don TB" value={formatPrice(dashboardData.averageOrder, dashboardData.currency)} change="real" up />
-            <QuickStat icon={Eye} label="User active" value={String(dashboardData.activeUsers)} change="real" up />
-            <QuickStat icon={Activity} label="Don da huy" value={String(dashboardData.cancelledOrders)} change="real" />
+            <QuickStat icon={BarChart3} label="Đơn đã giao" value={String(dashboardData.deliveredOrders)} change="real" up />
+            <QuickStat icon={ShoppingCart} label="Giá trị đơn TB" value={formatPrice(dashboardData.averageOrder, dashboardData.currency)} change="real" up />
+            <QuickStat icon={Eye} label="Người dùng hoạt động" value={String(dashboardData.activeUsers)} change="real" up />
+            <QuickStat icon={Activity} label="Đơn đã hủy" value={String(dashboardData.cancelledOrders)} change="real" />
           </div>
         </section>
       </div>

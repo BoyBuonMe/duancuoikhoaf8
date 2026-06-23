@@ -313,7 +313,7 @@ export default function OrderDetailPage({ order, onBack }: Props) {
     setDetail(nextDetail);
     reset({ status: getOrderStatus(nextDetail) });
     await dispatch(getOrders());
-    setSuccessMessage("Da cap nhat trang thai đơn hàng");
+    setSuccessMessage("Đã cập nhật trạng thái đơn hàng");
   }
 
   return (
@@ -415,7 +415,7 @@ export default function OrderDetailPage({ order, onBack }: Props) {
           <div className="border-b border-slate-100 px-6 py-4">
             <h2 className="flex items-center gap-2 text-base font-bold text-slate-950">
               <ReceiptText size={18} />
-              Sản phẩm trong don
+              Sản phẩm trong đơn
             </h2>
           </div>
           <div className="overflow-x-auto">
@@ -432,7 +432,7 @@ export default function OrderDetailPage({ order, onBack }: Props) {
                 {getOrderItems(detail).length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-6 py-10 text-center text-slate-400">
-                      Đơn hàng chua co sản phẩm
+                      Đơn hàng chưa có sản phẩm
                     </td>
                   </tr>
                 ) : (

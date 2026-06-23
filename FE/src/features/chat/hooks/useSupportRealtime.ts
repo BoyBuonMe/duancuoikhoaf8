@@ -76,7 +76,14 @@ export function useSupportRealtime({
   }, [onConversationDeleted]);
 
   useEffect(() => {
+<<<<<<< HEAD
     if (!enabled || !isPusherConfigured()) return;
+=======
+    if (!enabled || !isPusherConfigured()) {
+      const timer = window.setTimeout(() => setUsingPolling(true), 0);
+      return () => window.clearTimeout(timer);
+    }
+>>>>>>> features/task-01
 
     const pusher = createPusherClient();
     pusherRef.current = pusher;

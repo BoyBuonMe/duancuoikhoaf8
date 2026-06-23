@@ -1,14 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import { Bell } from "lucide-react";
+import React from "react";
+import { usePathname } from "next/navigation";
+import { AdminNotificationBell } from "@/admin/components/AdminNotificationBell";
 import AdminSidebar from "./admin/AdminSidebar/AdminSidebar";
 import type { AdminPage } from "./admin/AdminSidebar/AdminSidebar";
-import DashboardOverview from "./admin/DashboardOverview/DashboardOverview";
-import OrdersPage from "./admin/OrdersPage/OrdersPage";
-import ProductsPage from "./admin/ProductsPage/ProductsPage";
-import UsersPage from "./admin/UsersPage/UsersPage";
-import VouchersPage from "./admin/VouchersPage/VouchersPage";
 
 const pageTitles: Record<AdminPage, { title: string; subtitle: string }> = {
   dashboard: {
@@ -37,42 +33,49 @@ const pageTitles: Record<AdminPage, { title: string; subtitle: string }> = {
   },
 };
 
-export default function AdminDashboard() {
-  const [activePage, setActivePage] = useState<AdminPage>("dashboard");
-  const { title, subtitle } = pageTitles[activePage];
+function pageFromPathname(pathname: string): AdminPage {
+  if (pathname.startsWith("/admin/products")) return "products";
+  if (pathname.startsWith("/admin/orders")) return "orders";
+  if (pathname.startsWith("/admin/customers")) return "customers";
+  if (pathname.startsWith("/admin/promotions")) return "promotions";
+  if (pathname.startsWith("/admin/settings")) return "settings";
+  return "dashboard";
+}
+
+export default function AdminDashboard({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const page = pageFromPathname(pathname);
+  const { title, subtitle } = pageTitles[page];
 
   return (
+<<<<<<< HEAD
     <div className="flex h-screen bg-gray-50">
       <AdminSidebar activePage={activePage} onPageChange={setActivePage} />
+=======
+    <div className="flex min-h-screen flex-col bg-slate-100 lg:flex-row">
+      <AdminSidebar />
+>>>>>>> features/task-01
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-8">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
-            <p className="text-xs text-gray-500">{subtitle}</p>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex min-h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold tracking-tight text-slate-950">
+              {title}
+            </h1>
+            <p className="mt-0.5 truncate text-xs font-medium text-slate-500">
+              {subtitle}
+            </p>
           </div>
-          <button className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-500 shadow-sm transition hover:text-gray-700">
-            <Bell size={18} />
-            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
-              3
-            </span>
-          </button>
+          <AdminNotificationBell />
         </header>
 
-        <main className="flex-1 overflow-y-auto p-8">
-          <div key={activePage} className="h-full animate-page-in">
-            {activePage === "dashboard" && <DashboardOverview />}
-            {activePage === "products" && <ProductsPage />}
-            {activePage === "orders" && <OrdersPage />}
-            {activePage === "customers" && <UsersPage />}
-            {activePage === "promotions" && <VouchersPage />}
-            {activePage === "settings" && (
-              <div className="flex h-64 flex-col items-center justify-center gap-2 text-gray-400">
-                <p className="text-base font-medium">
-                  Tính năng đang phát triển
-                </p>
-              </div>
-            )}
+        <main className="flex-1 p-3 sm:p-4 lg:p-6">
+          <div key={page} className="h-full animate-page-in">
+            {children}
           </div>
         </main>
       </div>

@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
+<<<<<<< HEAD
 import { Suspense } from "react";
+=======
+import { Suspense, useSyncExternalStore } from "react";
+>>>>>>> features/task-01
 import { AccountOrdersSectionWithParams } from "@/components/account/AccountOrdersSection";
 import { SignOutButton } from "@/components/account/SignOutButton";
 import { useAuth } from "@/features/auth";
@@ -140,8 +144,20 @@ function formatAccountDisplayName(user: AuthUser | null): string {
   return fromEmail ?? "";
 }
 
+function useClientMounted() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
+
 export function AccountPageClient() {
+<<<<<<< HEAD
   const mounted = useHasHydrated();
+=======
+  const mounted = useClientMounted();
+>>>>>>> features/task-01
   const { user, sessionChecked } = useAuth();
   const { xp, xpGoal, tier } = mockUser;
 

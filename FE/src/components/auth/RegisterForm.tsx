@@ -204,6 +204,7 @@ export function RegisterForm() {
           endAdornment={
             <button
               type="button"
+              tabIndex={-1}
               onClick={openDatePicker}
               className="text-store-fg-muted hover:text-store-ink"
               aria-label="Choose date of birth"
@@ -241,6 +242,7 @@ export function RegisterForm() {
           endAdornment={
             <button
               type="button"
+              tabIndex={-1}
               onClick={() => setShowPassword((v) => !v)}
               className="text-store-fg-muted hover:text-store-ink"
               aria-label={showPassword ? "Hide password" : "Show password"}
@@ -264,6 +266,7 @@ export function RegisterForm() {
           endAdornment={
             <button
               type="button"
+              tabIndex={-1}
               onClick={() => setShowPassword((v) => !v)}
               className="text-store-fg-muted hover:text-store-ink"
               aria-label={showPassword ? "Hide password" : "Show password"}

@@ -13,6 +13,7 @@ import {
   sendOrderConfirmationEmail,
   shouldSendOrderConfirmationEmail,
 } from "@/models/orders/order-confirmation.email";
+import { createDashboardNotification } from "@/models/notifications/notifications.service";
 
 function generateOrderCode(): string {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
@@ -211,6 +212,23 @@ export async function createOrder(
   }
 
   const orderStatus = (options?.status ?? "pending") as OrderStatus;
+
+  void createDashboardNotification({
+    type: "order_created",
+    title: "Đơn hàng mới",
+    message: `${user.name || user.email} vừa tạo đơn ${order.orderCode}`,
+    metadata: {
+      orderCode: order.orderCode,
+      userEmail: user.email,
+      total: body.total,
+      status: orderStatus,
+    },
+  }).catch((err) => {
+    console.error(
+      `[notifications] Failed to create order notification for ${order.orderCode}:`,
+      err,
+    );
+  });
 
   void notifyOrderConfirmationEmail(
     user,

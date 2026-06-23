@@ -21,6 +21,7 @@ export function ThemeScript() {
 `;
 
   return (
+    // eslint-disable-next-line @next/next/no-before-interactive-script-outside-document
     <Script
       id="theme-init"
       strategy="beforeInteractive"

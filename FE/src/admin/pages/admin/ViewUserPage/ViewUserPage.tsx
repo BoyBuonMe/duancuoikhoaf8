@@ -26,8 +26,8 @@ const ROLE_COLORS: Record<UserRole, string> = {
 };
 
 const STATUS_LABELS: Record<UserStatus, string> = {
-  active: "Hoat dong",
-  blocked: "Bi khoa",
+  active: "Hoạt động",
+  blocked: "Bị khóa",
 };
 
 const STATUS_COLORS: Record<UserStatus, string> = {
@@ -50,7 +50,7 @@ export default function ViewUserPage({ user, onBack, onEdit }: Props) {
         Quay lại danh sách
       </button>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-950">
             Chi tiết người dùng
@@ -67,9 +67,9 @@ export default function ViewUserPage({ user, onBack, onEdit }: Props) {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm max-w-2xl p-6 space-y-6 animate-card-in delay-150">
+      <div className="w-full space-y-6 rounded-lg border border-gray-100 bg-white p-4 shadow-sm animate-card-in delay-150 sm:p-6">
         {/* Avatar + name */}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-2xl font-bold shrink-0">
             {user.name.split(" ").pop()?.charAt(0).toUpperCase()}
           </div>
@@ -94,7 +94,7 @@ export default function ViewUserPage({ user, onBack, onEdit }: Props) {
         <hr className="border-gray-100" />
 
         {/* Details grid */}
-        <div className="grid grid-cols-2 gap-5 text-sm">
+        <div className="grid gap-5 text-sm sm:grid-cols-2 xl:grid-cols-4">
           <div>
             <p className="text-xs font-medium text-gray-400 uppercase mb-1">
               Số điện thoại

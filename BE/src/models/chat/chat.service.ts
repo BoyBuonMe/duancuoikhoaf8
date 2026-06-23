@@ -10,6 +10,7 @@ import {
   serializeMessage,
 } from "@/models/chat/chat.realtime";
 import type { ConversationStatus } from "@/models/chat/Conversation.model";
+import { createDashboardNotification } from "@/models/notifications/notifications.service";
 import { httpError } from "@/utils/http-error";
 
 async function getConversationForUser(
@@ -189,6 +190,24 @@ export async function sendSupportMessage(
   const payload = serializeMessage(message);
   await emitSupportMessage(conversationId, payload);
 
+  if (!isAdmin) {
+    void createDashboardNotification({
+      type: "support_message",
+      title: "Tin nhắn hỗ trợ mới",
+      message: "Khách hàng vừa gửi tin nhắn hỗ trợ mới",
+      metadata: {
+        conversationId,
+        messageId: payload.id,
+        senderId: userId,
+      },
+    }).catch((err) => {
+      console.error(
+        `[notifications] Failed to create chat notification for ${conversationId}:`,
+        err,
+      );
+    });
+  }
+
   return payload;
 }
 
@@ -256,7 +275,10 @@ export async function authorizePrivateChannel(
   role: string | undefined,
   channelName: string,
 ) {
-  if (channelName === "private-admin-inbox") {
+  if (
+    channelName === "private-admin-inbox" ||
+    channelName === "private-dashboard-notifications"
+  ) {
     if (!isDashboardRole(role)) throw httpError("Forbidden", 403);
     return true;
   }

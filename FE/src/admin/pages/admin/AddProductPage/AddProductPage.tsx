@@ -485,6 +485,7 @@ export default function AddProductPage({ onBack }: Props) {
       <form
         id="admin-add-product-form"
         onSubmit={handleSubmit(onSubmit)}
+<<<<<<< HEAD
         className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]"
       >
         <div className="space-y-6">
@@ -497,6 +498,18 @@ export default function AddProductPage({ onBack }: Props) {
               />
             </Field>
           </Card>
+=======
+        className="dashboard-card w-full p-4 animate-card-in delay-150 sm:p-6"
+      >
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <Field label="Tên sản phẩm" error={errors.title?.message}>
+            <input
+              {...register("title")}
+              className="form-input"
+              placeholder="Arrival T-Shirt"
+            />
+          </Field>
+>>>>>>> features/task-01
 
           <Card title="Pricing">
             <div className="grid gap-4 md:grid-cols-2">
@@ -882,6 +895,26 @@ export default function AddProductPage({ onBack }: Props) {
             ) : null}
           </div>
         )}
+<<<<<<< HEAD
+=======
+
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onBack}
+            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Hủy
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
+          >
+            {isSubmitting ? "Đang lưu..." : "Thêm sản phẩm"}
+          </button>
+        </div>
+>>>>>>> features/task-01
       </form>
     </div>
   );
