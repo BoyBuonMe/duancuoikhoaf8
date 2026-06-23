@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { authLogin, getCurrentUser } from "@/admin/services/auth/authService";
 import type { AuthUser } from "@/admin/services/auth/authService";
+import { writeAccessToken } from "@/utils/http";
 
 interface AuthState {
   user: AuthUser | null;
@@ -21,9 +22,7 @@ const authSlice = createSlice({
     logout(state) {
       state.user = null;
       state.error = null;
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
-      }
+      writeAccessToken(null);
     },
     clearError(state) {
       state.error = null;

@@ -7,15 +7,24 @@ import {
 import { validate } from "@/middlewares/validate.middleware";
 import * as adminController from "@/models/admin/admin.controller";
 import {
+  adminImageUpload,
+  handleAdminImageUploadError,
+} from "@/models/admin/admin.upload";
+import {
+  adminCreateCategoryOptionBodySchema,
+  adminCreateCurrencyOptionBodySchema,
   adminCreateProductBodySchema,
   adminCreateVariantBodySchema,
   adminCreateVoucherBodySchema,
+  adminCurrencyCodeParamsSchema,
   adminIdParamsSchema,
   adminListOrdersQuerySchema,
   adminListProductsQuerySchema,
   adminListUsersQuerySchema,
   adminListVouchersQuerySchema,
   adminOrderCodeParamsSchema,
+  adminUpdateCategoryOptionBodySchema,
+  adminUpdateCurrencyOptionBodySchema,
   adminUpdateOrderStatusBodySchema,
   adminUpdateProductBodySchema,
   adminUpdateUserBodySchema,
@@ -48,6 +57,52 @@ router.delete(
   requireBoss,
   validate(adminIdParamsSchema, "params"),
   adminController.deleteUser,
+);
+
+router.get(
+  "/product-category-options",
+  adminController.listProductCategoryOptions,
+);
+router.post(
+  "/product-category-options",
+  validate(adminCreateCategoryOptionBodySchema),
+  adminController.createProductCategoryOption,
+);
+router.patch(
+  "/product-category-options/:id",
+  validate(adminIdParamsSchema, "params"),
+  validate(adminUpdateCategoryOptionBodySchema),
+  adminController.updateProductCategoryOption,
+);
+router.delete(
+  "/product-category-options/:id",
+  validate(adminIdParamsSchema, "params"),
+  adminController.deleteProductCategoryOption,
+);
+
+router.get("/currency-options", adminController.listCurrencyOptions);
+router.post(
+  "/currency-options",
+  validate(adminCreateCurrencyOptionBodySchema),
+  adminController.createCurrencyOption,
+);
+router.patch(
+  "/currency-options/:code",
+  validate(adminCurrencyCodeParamsSchema, "params"),
+  validate(adminUpdateCurrencyOptionBodySchema),
+  adminController.updateCurrencyOption,
+);
+router.delete(
+  "/currency-options/:code",
+  validate(adminCurrencyCodeParamsSchema, "params"),
+  adminController.deleteCurrencyOption,
+);
+
+router.post(
+  "/uploads/images",
+  adminImageUpload.array("images", 8),
+  handleAdminImageUploadError,
+  adminController.uploadImages,
 );
 
 router.get(

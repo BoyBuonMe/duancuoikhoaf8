@@ -1,56 +1,10 @@
-import { httpError } from "@/utils/http-error";
-import * as productsRepo from "@/models/products/products.repository";
+import mongoose from "mongoose";
 import Category from "@/models/categories/Category.model";
-
-// Maps level-0 nav names to the product category gender tag
-const GENDER_MAP: Record<string, string> = {
-  Women: "Womens",
-  Men: "Mens",
-  Accessories: "Unisex",
-};
-
-// Nav-only section labels that don't correspond to product category names
-const NAV_ONLY_LABELS = new Set([
-  "Products",
-  "Trending",
-  "Last Chance",
-  "Explore",
-  "Equipment",
-  "T-Shirts & Tops",
-  "Underwear",
-  "Bags",
-  "Socks",
-  "Headwear",
-]);
-
-// Patterns that are editorial/curated — not product category names
-const EDITORIAL_PATTERN =
-  /^(All\s|New Product Drops|Best Sellers|Spring Looks|Seasonal|Pilates|Running|Lifting|For Less|Accessories For Less|New to Gymshark)/i;
-
-function pathSegmentsToProductFilter(segments: string[]): string[] {
-  if (!segments.length) return [];
-
-  const filters: string[] = [];
-
-  // First segment is always the gender/top-level
-  const gender = GENDER_MAP[segments[0]];
-  if (gender) filters.push(gender);
-
-  for (let i = 1; i < segments.length; i++) {
-    const seg = segments[i];
-    const isLeaf = i === segments.length - 1;
-
-    // Editorial group labels apply only at leaf level (e.g. Trending > Pilates).
-    if (!isLeaf && EDITORIAL_PATTERN.test(seg)) continue;
-    if (/\bGuide\b/i.test(seg)) continue;
-    if (/^All\s/i.test(seg)) continue;
-    if (seg.endsWith("?")) continue;
-    if (NAV_ONLY_LABELS.has(seg)) continue;
-    filters.push(seg);
-  }
-
-  return filters;
-}
+import ProductRating from "@/models/products/ProductRating.model";
+import ProductVariant from "@/models/products/ProductVariant.model";
+import { pathSegmentsToProductTags } from "@/models/products/product-categories";
+import * as productsRepo from "@/models/products/products.repository";
+import { httpError } from "@/utils/http-error";
 
 export async function listRecentProducts(limit = 10) {
   return productsRepo.findRecentProducts(limit);
@@ -67,20 +21,32 @@ export async function listProductsByCategory(
 ) {
   const category = await Category.findOne({ slug: categorySlug }).lean();
   const filters = category
-    ? pathSegmentsToProductFilter(category.pathSegments)
+    ? pathSegmentsToProductTags(category.pathSegments)
+    : [];
+  const categorySlugs = category
+    ? await Category.distinct("slug", {
+        level: { $gte: category.level },
+        ...Object.fromEntries(
+          category.pathSegments.map((segment, index) => [
+            `pathSegments.${index}`,
+            segment,
+          ]),
+        ),
+      })
     : [];
 
   const [products, total] = await Promise.all([
-    productsRepo.findProductsByCategories(filters, limit, skip),
-    productsRepo.countProductsByCategories(filters),
+    productsRepo.findProductsByCategoryPlacement(
+      categorySlugs,
+      filters,
+      limit,
+      skip,
+    ),
+    productsRepo.countProductsByCategoryPlacement(categorySlugs, filters),
   ]);
 
   return { products, total, filters };
 }
-
-import ProductVariant from "@/models/products/ProductVariant.model";
-import ProductRating from "@/models/products/ProductRating.model";
-import mongoose from "mongoose";
 
 export async function getProductById(id: string) {
   const product = await productsRepo.findProductById(id);
@@ -91,7 +57,7 @@ export async function getProductById(id: string) {
     isActive: true,
   }).lean();
 
-  const skus = variants.map((v) => v.sku);
+  const skus = variants.map((variant) => variant.sku);
   const db = mongoose.connection.db;
   const inventoryItems = db
     ? await db
@@ -101,19 +67,21 @@ export async function getProductById(id: string) {
     : [];
   const inventoryMap = new Map(inventoryItems.map((item) => [item.sku, item]));
 
-  const sizeSlugs = [...new Set(variants.map((v) => v.size).filter(Boolean))];
+  const sizeSlugs = [
+    ...new Set(variants.map((variant) => variant.size).filter(Boolean)),
+  ];
   const sizeDocs = db
     ? await db
         .collection("sizes")
         .find({ slug: { $in: sizeSlugs } })
         .toArray()
     : [];
-  const sizeMap = new Map(sizeDocs.map((s) => [s.slug, s]));
+  const sizeMap = new Map(sizeDocs.map((size) => [size.slug, size]));
 
-  const sizes = variants.map((v) => {
-    const sizeSlug = v.size || "one-size";
+  const sizes = variants.map((variant) => {
+    const sizeSlug = variant.size || "one-size";
     const sizeDoc = sizeMap.get(sizeSlug);
-    const inventoryDoc = inventoryMap.get(v.sku);
+    const inventoryDoc = inventoryMap.get(variant.sku);
     const inStock = inventoryDoc
       ? inventoryDoc.status !== "out_of_stock" &&
         inventoryDoc.quantity - inventoryDoc.reserved > 0
@@ -123,7 +91,7 @@ export async function getProductById(id: string) {
       id: sizeSlug,
       label: sizeDoc?.name || sizeSlug.toUpperCase().replace("-", " "),
       inStock,
-      sku: v.sku,
+      sku: variant.sku,
     };
   });
 
@@ -184,18 +152,14 @@ export async function rateProduct(
       userId: new mongoose.Types.ObjectId(userId),
     },
     { rating },
-    { upsert: true, returnDocument: "after" },
+    { upsert: true, new: true },
   );
 
   return getProductRatingStats(productId);
 }
 
-/**
- * Same enrichment as getProductById but looks up by URL slug instead of _id.
- */
 export async function getProductBySlug(slug: string) {
   const product = await productsRepo.findProductBySlug(slug);
   if (!product) throw httpError("Product not found", 404);
-  // Reuse the same enrichment logic via getProductById
   return getProductById(String(product._id));
 }

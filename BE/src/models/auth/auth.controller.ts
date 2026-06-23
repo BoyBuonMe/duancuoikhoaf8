@@ -26,6 +26,7 @@ import type {
 } from "@/models/auth/auth.validation";
 
 const REFRESH_COOKIE = "refreshToken";
+const AUTH_SESSION_COOKIE = "authSession";
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const EMAIL_VERIFICATION_TOKEN_BYTES = 32;
 const EMAIL_VERIFICATION_EXPIRES_MS = 24 * 60 * 60 * 1000;
@@ -47,6 +48,26 @@ function refreshCookieOptions(): CookieOptions {
   };
 }
 
+function authSessionCookieOptions(): CookieOptions {
+  return {
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: SEVEN_DAYS_MS,
+  };
+}
+
+function clearAuthCookies(res: Response): void {
+  res.clearCookie(REFRESH_COOKIE, {
+    ...refreshCookieOptions(),
+    maxAge: undefined,
+  });
+  res.clearCookie(AUTH_SESSION_COOKIE, {
+    ...authSessionCookieOptions(),
+    maxAge: undefined,
+  });
+}
+
 async function issueTokens(
   res: Response,
   payload: JwtPayload,
@@ -54,6 +75,7 @@ async function issueTokens(
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
   res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
+  res.cookie(AUTH_SESSION_COOKIE, "1", authSessionCookieOptions());
 
   await RefreshToken.create({
     tokenHash: hashResetToken(refreshToken),
@@ -159,7 +181,7 @@ export async function register(
   next: NextFunction,
 ) {
   try {
-    const { email, password, name } = req.body as RegisterBody;
+    const { email, password, name, phone } = req.body as RegisterBody;
 
     const exists = await User.findOne({ email });
     if (exists) {
@@ -171,6 +193,7 @@ export async function register(
       email,
       passwordHash,
       name,
+      phone,
       authProvider: "local",
       emailVerified: false,
     });
@@ -311,6 +334,7 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
       .cookies;
     const token = cookies?.[REFRESH_COOKIE];
     if (!token) {
+      clearAuthCookies(res);
       throw httpError("Refresh token missing", 401);
     }
 
@@ -318,6 +342,7 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
     try {
       payload = verifyRefreshToken(token);
     } catch {
+      clearAuthCookies(res);
       throw httpError("Invalid or expired refresh token", 401);
     }
 
@@ -327,14 +352,14 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
     });
     if (!stored) {
       // Token đã bị revoke hoặc không hợp lệ — xoá cookie
-      res.clearCookie(REFRESH_COOKIE, refreshCookieOptions());
+      clearAuthCookies(res);
       throw httpError("Refresh token revoked", 401);
     }
 
     // Rotation: issue hoàn toàn token mới
     const user = await User.findById(payload.sub).select("email role status");
     if (!user || user.status === "blocked") {
-      res.clearCookie(REFRESH_COOKIE, refreshCookieOptions());
+      clearAuthCookies(res);
       throw httpError("Unauthorized", 401);
     }
 
@@ -364,10 +389,7 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
       await RefreshToken.deleteOne({ tokenHash: hashResetToken(token) });
     }
 
-    res.clearCookie(REFRESH_COOKIE, {
-      ...refreshCookieOptions(),
-      maxAge: undefined,
-    });
+    clearAuthCookies(res);
     res.status(204).end();
   } catch (e) {
     next(e);
@@ -518,6 +540,7 @@ export async function resetPassword(
         },
       },
     );
+    await RefreshToken.deleteMany({ userId: user._id });
 
     res.json({ message: "Password has been reset." });
   } catch (e) {

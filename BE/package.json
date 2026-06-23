@@ -36,6 +36,7 @@
   "dependencies": {
     "axios": "^1.17.0",
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -45,6 +46,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.2",
+    "multer": "^2.2.0",
     "nodemailer": "^8.0.10",
     "pusher": "^5.2.0",
     "qs": "^6.15.2",
@@ -57,6 +59,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^2.1.0",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.0",
     "@types/qs": "^6.15.1",

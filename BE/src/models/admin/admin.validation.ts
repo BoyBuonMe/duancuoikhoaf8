@@ -39,6 +39,53 @@ const priceSchema = z.object({
   currency: z.string().trim().min(1).max(8).toUpperCase(),
 });
 
+const categorySlugSchema = z.string().trim().min(1).max(180);
+const categoryNameSchema = z.string().trim().min(1).max(120);
+const currencyCodeSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(8)
+  .regex(/^[A-Za-z0-9]+$/, "Currency code must use letters and numbers only")
+  .toUpperCase();
+
+export const adminCurrencyCodeParamsSchema = z.object({
+  code: currencyCodeSchema,
+});
+
+export const adminCreateCategoryOptionBodySchema = z
+  .object({
+    name: categoryNameSchema,
+    parentSlug: z
+      .string()
+      .trim()
+      .min(1)
+      .max(180)
+      .nullable()
+      .optional(),
+  })
+  .strict();
+
+export const adminUpdateCategoryOptionBodySchema = z
+  .object({
+    name: categoryNameSchema,
+  })
+  .strict();
+
+export const adminCreateCurrencyOptionBodySchema = z
+  .object({
+    code: currencyCodeSchema,
+  })
+  .strict();
+
+export const adminUpdateCurrencyOptionBodySchema =
+  adminCreateCurrencyOptionBodySchema;
+
+const sourceUrlSchema = z.union([
+  z.string().trim().url(),
+  z.string().trim().regex(/^\/products\/[A-Za-z0-9][A-Za-z0-9-]*$/),
+]);
+
 export const adminListProductsQuerySchema = z.object({
   search: z.string().trim().optional(),
   category: z.string().trim().optional(),
@@ -112,12 +159,13 @@ export const adminUpdateOrderStatusBodySchema = z
   }));
 
 export const adminCreateProductBodySchema = z.object({
-  sourceUrl: z.string().trim().url(),
+  sourceUrl: sourceUrlSchema.optional(),
   title: z.string().trim().min(1).max(240),
   price: priceSchema,
   imageUrls: z.array(z.string().trim().url()).optional().default([]),
   localImagePaths: z.array(z.string().trim()).optional().default([]),
   categories: z.array(z.string().trim().min(1)).optional().default([]),
+  categorySlugs: z.array(categorySlugSchema).optional().default([]),
   scrapedAt: z.coerce.date().optional().default(() => new Date()),
 });
 
@@ -243,6 +291,21 @@ export const adminUpdateVoucherBodySchema = z
 export type AdminListUsersQuery = z.infer<typeof adminListUsersQuerySchema>;
 export type AdminUpdateUserBody = z.infer<typeof adminUpdateUserBodySchema>;
 export type AdminListProductsQuery = z.infer<typeof adminListProductsQuerySchema>;
+export type AdminCurrencyCodeParams = z.infer<
+  typeof adminCurrencyCodeParamsSchema
+>;
+export type AdminCreateCategoryOptionBody = z.infer<
+  typeof adminCreateCategoryOptionBodySchema
+>;
+export type AdminUpdateCategoryOptionBody = z.infer<
+  typeof adminUpdateCategoryOptionBodySchema
+>;
+export type AdminCreateCurrencyOptionBody = z.infer<
+  typeof adminCreateCurrencyOptionBodySchema
+>;
+export type AdminUpdateCurrencyOptionBody = z.infer<
+  typeof adminUpdateCurrencyOptionBodySchema
+>;
 export type AdminCreateProductBody = z.infer<typeof adminCreateProductBodySchema>;
 export type AdminUpdateProductBody = z.infer<typeof adminUpdateProductBodySchema>;
 export type AdminCreateVariantBody = z.infer<typeof adminCreateVariantBodySchema>;

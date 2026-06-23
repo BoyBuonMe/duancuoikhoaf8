@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import http from "@/admin/utils/http";
+import { writeAccessToken } from "@/utils/http";
 
 export type AuthUser = {
   id: string;
@@ -37,7 +38,7 @@ export const authLogin = createAsyncThunk<
         data,
       );
       const { token: accessToken } = response;
-      localStorage.setItem("accessToken", accessToken);
+      writeAccessToken(accessToken);
       return response;
     } catch (error: unknown) {
       if (axios.isAxiosError<AuthErrorPayload>(error)) {

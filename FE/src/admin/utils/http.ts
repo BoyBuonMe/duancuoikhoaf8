@@ -1,26 +1,5 @@
-import axios, { type AxiosRequestConfig } from "axios";
-
-const httpClient = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_API_URL ??
-    process.env.NEXT_PUBLIC_BASE_API ??
-    "http://localhost:3001/api",
-  withCredentials: true,
-});
-
-httpClient.interceptors.request.use(
-  (config) => {
-    const accessToken =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
+import type { AxiosRequestConfig } from "axios";
+import { httpClient } from "@/utils/http";
 
 async function _send<T>(
   method: string,
