@@ -52,13 +52,8 @@ export default function AdminDashboard({
   const { title, subtitle } = pageTitles[page];
 
   return (
-<<<<<<< HEAD
-    <div className="flex h-screen bg-gray-50">
-      <AdminSidebar activePage={activePage} onPageChange={setActivePage} />
-=======
     <div className="flex min-h-screen flex-col bg-slate-100 lg:flex-row">
       <AdminSidebar />
->>>>>>> features/task-01
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex min-h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">

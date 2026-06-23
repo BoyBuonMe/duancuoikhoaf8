@@ -3,6 +3,7 @@ import { renderHook } from "@testing-library/react";
 
 import { useCart } from "@/features/cart/model/useCart";
 import { TestStoreProvider } from "@/test-utils/store";
+import { ToastProvider } from "@/shared/context/ToastContext";
 
 function wrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +13,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
         auth: { user: null, sessionChecked: true },
       }}
     >
-      {children}
+      <ToastProvider>{children}</ToastProvider>
     </TestStoreProvider>
   );
 }

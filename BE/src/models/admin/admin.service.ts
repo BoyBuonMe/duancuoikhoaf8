@@ -534,6 +534,16 @@ export async function updateProduct(
   const before = await Product.findById(id).select("title sourceUrl").lean();
   if (!before) throw httpError("Product not found", 404);
 
+  const updateBody = { ...body };
+  if (Array.isArray(body.categorySlugs)) {
+    const placement = await resolveProductCategoryPlacement(
+      body.categorySlugs,
+      body.categories,
+    );
+    updateBody.categorySlugs = placement.categorySlugs;
+    updateBody.categories = placement.categories;
+  }
+
   const product = await Product.findByIdAndUpdate(
     id,
     { $set: updateBody },

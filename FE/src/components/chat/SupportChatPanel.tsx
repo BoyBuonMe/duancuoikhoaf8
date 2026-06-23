@@ -27,16 +27,10 @@ export function SupportChatPanel() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-<<<<<<< HEAD
-    if (startedRef.current) return;
-    startedRef.current = true;
-    void bootstrap();
-=======
     if (!startedRef.current) {
       startedRef.current = true;
       void bootstrap();
     }
->>>>>>> features/task-01
   }, [bootstrap]);
 
   useEffect(() => {

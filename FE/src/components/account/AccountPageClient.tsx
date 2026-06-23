@@ -1,15 +1,10 @@
 "use client";
 
 import Link from "next/link";
-<<<<<<< HEAD
-import { Suspense } from "react";
-=======
 import { Suspense, useSyncExternalStore } from "react";
->>>>>>> features/task-01
 import { AccountOrdersSectionWithParams } from "@/components/account/AccountOrdersSection";
 import { SignOutButton } from "@/components/account/SignOutButton";
 import { useAuth } from "@/features/auth";
-import { useHasHydrated } from "@/shared/hooks";
 import type { AuthUser } from "@/features/auth/model/auth.types";
 
 type MockUser = {
@@ -153,11 +148,7 @@ function useClientMounted() {
 }
 
 export function AccountPageClient() {
-<<<<<<< HEAD
-  const mounted = useHasHydrated();
-=======
   const mounted = useClientMounted();
->>>>>>> features/task-01
   const { user, sessionChecked } = useAuth();
   const { xp, xpGoal, tier } = mockUser;
 

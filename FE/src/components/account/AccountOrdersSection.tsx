@@ -10,7 +10,6 @@ import { useOrdersList } from "@/features/orders";
 import { useAppDispatch } from "@/store/hooks";
 import { OrderStatusBadges, type Order } from "@/features/orders";
 import { formatUsd } from "@/shared/lib/format-money";
-import { useHasHydrated } from "@/shared/hooks";
 
 function ClothesIllustration() {
   return (
@@ -173,11 +172,7 @@ export function AccountOrdersSection({
   paymentPendingMessage = null,
   paymentFailedMessage = null,
 }: AccountOrdersSectionProps) {
-<<<<<<< HEAD
-  const mounted = useHasHydrated();
-=======
   const mounted = useClientMounted();
->>>>>>> features/task-01
   const { isAuthenticated } = useAuth();
   const { orders, isLoading, error } = useOrdersList();
 

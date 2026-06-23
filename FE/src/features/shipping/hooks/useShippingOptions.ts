@@ -46,13 +46,9 @@ export function useShippingOptions(input: UseShippingOptionsInput) {
   const requestKey = buildRequestKey(input);
 
   useEffect(() => {
-<<<<<<< HEAD
-    if (!requestKey) return;
-=======
     if (!requestKey) {
       return;
     }
->>>>>>> features/task-01
 
     let cancelled = false;
 

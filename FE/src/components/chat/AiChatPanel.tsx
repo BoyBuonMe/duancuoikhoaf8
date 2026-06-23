@@ -69,16 +69,10 @@ export function AiChatPanel() {
   const startedRef = useRef(false);
 
   useEffect(() => {
-<<<<<<< HEAD
-    if (startedRef.current) return;
-    startedRef.current = true;
-    void bootstrap();
-=======
     if (!startedRef.current) {
       startedRef.current = true;
       void bootstrap();
     }
->>>>>>> features/task-01
   }, [bootstrap]);
 
   const handleSend = async () => {

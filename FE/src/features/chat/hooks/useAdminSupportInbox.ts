@@ -68,29 +68,14 @@ export function useAdminSupportInbox(
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-<<<<<<< HEAD
   // Loading flags are derived (not stored) so we never call setState
   // synchronously inside the data-loading effects below.
   const isLoadingList = loadedFilter !== statusFilter;
   const isLoadingMessages =
     selectedId != null && loadedMessagesId !== selectedId;
-=======
-  const selectedIdRef = useRef(selectedId);
->>>>>>> features/task-01
 
   const selectedIdRef = useRef(selectedId);
   const autoSelectRef = useRef(autoSelect);
-<<<<<<< HEAD
-=======
-
-  useEffect(() => {
-    selectedIdRef.current = selectedId;
-  }, [selectedId]);
-
-  useEffect(() => {
-    autoSelectRef.current = autoSelect;
-  }, [autoSelect]);
->>>>>>> features/task-01
 
   const loadConversations = useCallback(
     async (options?: { silent?: boolean }) => {
@@ -151,7 +136,6 @@ export function useAdminSupportInbox(
   );
 
   const loadConversationsRef = useRef(loadConversations);
-<<<<<<< HEAD
   const loadMessagesRef = useRef(loadMessages);
 
   // Keep "latest value" refs current after each commit, instead of writing
@@ -176,38 +160,6 @@ export function useAdminSupportInbox(
     if (!selectedId) return;
     void loadMessagesRef.current(selectedId);
   }, [selectedId]);
-=======
-
-  const loadMessagesRef = useRef(loadMessages);
-
-  useEffect(() => {
-    loadConversationsRef.current = loadConversations;
-  }, [loadConversations]);
-
-  useEffect(() => {
-    loadMessagesRef.current = loadMessages;
-  }, [loadMessages]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void loadConversations();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [loadConversations]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      if (!selectedId) {
-        setMessages([]);
-        return;
-      }
-      void loadMessages(selectedId);
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [selectedId, loadMessages]);
->>>>>>> features/task-01
 
   const { usingPolling, pollIntervalMs } = useSupportRealtime({
     conversationId: selectedId,
