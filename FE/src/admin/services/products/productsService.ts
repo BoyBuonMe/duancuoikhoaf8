@@ -12,6 +12,7 @@ export interface Product {
   price: ProductPrice;
   imageUrls: string[];
   categories: string[];
+  categorySlugs?: string[];
   sourceUrl: string;
   scrapedAt: string;
   createdAt: string;
@@ -21,7 +22,8 @@ export interface Product {
 export interface ProductPayload {
   title: string;
   price: { amount: number; currency: string };
-  categories: string[];
+  categories?: string[];
+  categorySlugs?: string[];
   imageUrls: string[];
   sourceUrl?: string;
 }

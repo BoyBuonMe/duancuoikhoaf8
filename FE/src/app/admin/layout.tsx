@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import AdminScrollLock from "./AdminScrollLock";
 import ReduxProvider from "@/admin/ReduxProvider";
 
 export const metadata: Metadata = {
@@ -12,7 +13,8 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="admin-dashboard fixed inset-0 z-50 overflow-auto bg-slate-50 text-slate-950">
+    <div className="admin-dashboard fixed inset-0 z-50 overflow-hidden bg-slate-50 text-slate-950">
+      <AdminScrollLock />
       <ReduxProvider>{children}</ReduxProvider>
     </div>
   );

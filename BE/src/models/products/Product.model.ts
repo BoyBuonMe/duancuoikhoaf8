@@ -12,6 +12,7 @@ interface IProduct extends Document {
   imageUrls: string[];
   localImagePaths: string[];
   categories: string[];
+  categorySlugs: string[];
   scrapedAt: Date;
 }
 
@@ -31,10 +32,13 @@ const productSchema = new Schema<IProduct>(
     imageUrls: { type: [String], default: [] },
     localImagePaths: { type: [String], default: [] },
     categories: { type: [String], default: [] },
+    categorySlugs: { type: [String], default: [] },
     scrapedAt: { type: Date, required: true },
   },
   { timestamps: true, collection: "products" },
 );
+
+productSchema.index({ categorySlugs: 1 });
 
 const Product = mongoose.model<IProduct>("Product", productSchema);
 export default Product;

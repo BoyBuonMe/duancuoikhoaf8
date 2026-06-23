@@ -46,6 +46,7 @@ export function RegisterForm() {
       firstName: "",
       lastName: "",
       dateOfBirth: "",
+      phone: "",
       marketingOptIn: false,
     },
   });
@@ -62,6 +63,7 @@ export function RegisterForm() {
         email,
         password: values.password,
         name,
+        phone: values.phone.trim(),
       });
       setRegisteredEmail(email);
       setVerificationMessage(res.verificationUrl ?? res.message);
@@ -209,6 +211,15 @@ export function RegisterForm() {
               <Calendar className="size-5" strokeWidth={1.5} />
             </button>
           }
+        />
+
+        <AuthFloatingInput
+          id="register-phone"
+          label="Phone number*"
+          type="tel"
+          autoComplete="tel"
+          error={errors.phone?.message}
+          {...register("phone")}
         />
 
         <AuthFloatingInput

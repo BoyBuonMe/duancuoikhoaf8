@@ -42,7 +42,7 @@ export default function AdminDashboard() {
   const { title, subtitle } = pageTitles[activePage];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50">
       <AdminSidebar activePage={activePage} onPageChange={setActivePage} />
 
       <div className="flex flex-1 flex-col overflow-hidden">

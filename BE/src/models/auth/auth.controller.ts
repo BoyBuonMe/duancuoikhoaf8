@@ -181,7 +181,7 @@ export async function register(
   next: NextFunction,
 ) {
   try {
-    const { email, password, name } = req.body as RegisterBody;
+    const { email, password, name, phone } = req.body as RegisterBody;
 
     const exists = await User.findOne({ email });
     if (exists) {
@@ -193,6 +193,7 @@ export async function register(
       email,
       passwordHash,
       name,
+      phone,
       authProvider: "local",
       emailVerified: false,
     });

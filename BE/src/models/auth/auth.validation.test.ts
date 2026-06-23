@@ -16,10 +16,12 @@ describe("registerBodySchema", () => {
       email: "  User@Example.com  ",
       password: "supersecret",
       name: "  Chris  ",
+      phone: "  0912345678  ",
     });
     expect(parsed.email).toBe("user@example.com");
     expect(parsed.password).toBe("supersecret");
     expect(parsed.name).toBe("Chris");
+    expect(parsed.phone).toBe("0912345678");
   });
 
   it("rejects passwords shorter than 8 characters", () => {
@@ -27,6 +29,7 @@ describe("registerBodySchema", () => {
       registerBodySchema.parse({
         email: "user@example.com",
         password: "short",
+        phone: "0912345678",
       }),
     ).toThrow(/at least 8/i);
   });
@@ -36,6 +39,7 @@ describe("registerBodySchema", () => {
       registerBodySchema.parse({
         email: "not-an-email",
         password: "supersecret",
+        phone: "0912345678",
       }),
     ).toThrow();
   });
@@ -44,8 +48,38 @@ describe("registerBodySchema", () => {
     const parsed = registerBodySchema.parse({
       email: "user@example.com",
       password: "supersecret",
+      phone: "0912345678",
     });
     expect(parsed.name).toBe("");
+  });
+
+  it("rejects missing phone numbers", () => {
+    expect(() =>
+      registerBodySchema.parse({
+        email: "user@example.com",
+        password: "supersecret",
+      }),
+    ).toThrow();
+  });
+
+  it("rejects empty phone numbers", () => {
+    expect(() =>
+      registerBodySchema.parse({
+        email: "user@example.com",
+        password: "supersecret",
+        phone: "   ",
+      }),
+    ).toThrow(/required/i);
+  });
+
+  it("rejects phone numbers longer than 32 characters", () => {
+    expect(() =>
+      registerBodySchema.parse({
+        email: "user@example.com",
+        password: "supersecret",
+        phone: "1".repeat(33),
+      }),
+    ).toThrow(/too long/i);
   });
 });
 

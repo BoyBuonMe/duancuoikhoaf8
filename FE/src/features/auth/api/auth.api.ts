@@ -45,11 +45,13 @@ export async function registerApi(payload: {
   email: string;
   password: string;
   name?: string;
+  phone: string;
 }): Promise<RegisterResponse> {
   const { data } = await httpClient.post<RegisterResponse>("/auth/register", {
     email: payload.email.trim().toLowerCase(),
     password: payload.password,
     name: payload.name?.trim() ?? "",
+    phone: payload.phone.trim(),
   });
   return data;
 }

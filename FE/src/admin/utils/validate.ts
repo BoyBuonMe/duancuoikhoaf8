@@ -47,7 +47,10 @@ export function productFormSchema() {
     sourceUrl: z
       .string()
       .refine(
-        (val) => !val.trim() || /^https?:\/\/.+/.test(val.trim()),
+        (val) =>
+          !val.trim() ||
+          /^https?:\/\/.+/.test(val.trim()) ||
+          /^\/products\/[A-Za-z0-9][A-Za-z0-9-]*$/.test(val.trim()),
         "Source URL không hợp lệ (phải bắt đầu bằng http:// hoặc https://)",
       ),
   });
