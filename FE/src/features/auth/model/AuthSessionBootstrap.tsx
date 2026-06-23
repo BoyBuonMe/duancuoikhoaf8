@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { meApi } from "@/features/auth/api/auth.api";
-import { clearSession, setUser } from "@/features/auth/model/auth.slice";
+import { setGuestSession, setUser } from "@/features/auth/model/auth.slice";
 import { useAppDispatch } from "@/store/hooks";
 
 export function AuthSessionBootstrap() {
@@ -16,7 +16,7 @@ export function AuthSessionBootstrap() {
         if (!cancelled) dispatch(setUser(user));
       })
       .catch(() => {
-        if (!cancelled) dispatch(clearSession());
+        if (!cancelled) dispatch(setGuestSession());
       });
 
     return () => {

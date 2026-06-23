@@ -197,7 +197,7 @@ async function finalizePaidVnpayPayment(vnpTxnRef: string, paidAmount?: number) 
   }
 
   const order = await ordersService.createOrder(pending.userEmail, pending.checkout, {
-    status: "awaiting_pickup",
+    status: "shipping",
     isPay: true,
     vnpTxnRef,
     clearCart: true,

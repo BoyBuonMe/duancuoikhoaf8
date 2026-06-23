@@ -47,7 +47,13 @@ function IconChevronDown(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function IconStar({ filled, className }: { filled: boolean; className?: string }) {
+function IconStar({
+  filled,
+  className,
+}: {
+  filled: boolean;
+  className?: string;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -304,28 +310,36 @@ export function ProductDetail({
                       key={i}
                       filled={isFilled}
                       className={`size-4.5 ${
-                        isFilled ? "text-amber-500 fill-amber-500" : "text-store-fg-subtle"
+                        isFilled
+                          ? "text-amber-500 fill-amber-500"
+                          : "text-store-fg-subtle"
                       }`}
                     />
                   );
                 })}
               </div>
               <span className="text-sm font-black text-store-ink-strong">
-                {product.ratingAverage ? product.ratingAverage.toFixed(1) : "0.0"}
+                {product.ratingAverage
+                  ? product.ratingAverage.toFixed(1)
+                  : "0.0"}
               </span>
               <span className="text-xs text-store-fg-muted font-bold tracking-tight">
-                ({product.ratingCount ?? 0} {product.ratingCount === 1 ? "đánh giá" : "đánh giá"})
+                ({product.ratingCount ?? 0}{" "}
+                {product.ratingCount === 1 ? "đánh giá" : "đánh giá"})
               </span>
             </div>
 
             {/* User rating submission */}
-            {isAuthenticated ? (
+            {!hasHydrated ? null : isAuthenticated ? (
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider text-store-fg-muted">Đánh giá sản phẩm:</span>
+                <span className="text-[10px] font-black uppercase tracking-wider text-store-fg-muted">
+                  Đánh giá sản phẩm:
+                </span>
                 <div className="flex items-center gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => {
                     const starVal = i + 1;
-                    const isHoveredOrSelected = starVal <= (hoveredRating ?? userRating ?? 0);
+                    const isHoveredOrSelected =
+                      starVal <= (hoveredRating ?? userRating ?? 0);
                     return (
                       <button
                         key={i}

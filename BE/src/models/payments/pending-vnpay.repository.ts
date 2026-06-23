@@ -29,6 +29,6 @@ export async function markPendingVnpayPaymentCompleted(
   return PendingVnpayPayment.findOneAndUpdate(
     { vnpTxnRef: vnpTxnRef.toUpperCase(), status: "pending" },
     { $set: { status: "completed", orderCode: orderCode.toUpperCase() } },
-    { new: true },
+    { returnDocument: 'after' },
   ).lean();
 }

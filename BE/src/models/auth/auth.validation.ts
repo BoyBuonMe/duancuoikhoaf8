@@ -4,6 +4,11 @@ export const registerBodySchema = z.object({
   email: z.string().trim().toLowerCase().email(),
   password: z.string().min(8, "Password must be at least 8 characters"),
   name: z.string().trim().max(120).optional().default(""),
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Phone number is required")
+    .max(32, "Phone number is too long"),
 });
 
 export const loginBodySchema = z.object({

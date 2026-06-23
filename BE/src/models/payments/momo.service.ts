@@ -123,7 +123,7 @@ async function finalizeMomoPayment(
   }
 
   const order = await ordersService.createOrder(pending.userEmail, pending.checkout, {
-    status: isSuccess ? "awaiting_pickup" : "payment_failed",
+    status: isSuccess ? "shipping" : "payment_failed",
     isPay: isSuccess,
     momoOrderId: normalizedId,
     clearCart: true,

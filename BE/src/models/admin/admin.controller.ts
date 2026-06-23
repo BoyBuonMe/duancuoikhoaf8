@@ -1,15 +1,21 @@
 import type { NextFunction, Request, Response } from "express";
 import { httpError } from "@/utils/http-error";
 import * as adminService from "@/models/admin/admin.service";
+import { uploadAdminImages } from "@/models/admin/admin.upload";
 import type {
+  AdminCreateCategoryOptionBody,
+  AdminCreateCurrencyOptionBody,
   AdminCreateProductBody,
   AdminCreateVariantBody,
   AdminCreateVoucherBody,
+  AdminCurrencyCodeParams,
   AdminListOrdersQuery,
   AdminListProductsQuery,
   AdminListUsersQuery,
   AdminListVouchersQuery,
   AdminOrderCodeParams,
+  AdminUpdateCategoryOptionBody,
+  AdminUpdateCurrencyOptionBody,
   AdminUpdateOrderStatusBody,
   AdminUpdateProductBody,
   AdminUpdateUserBody,
@@ -95,6 +101,138 @@ export async function deleteUser(
   }
 }
 
+export async function listProductCategoryOptions(
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const result = await adminService.listProductCategoryOptions();
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function createProductCategoryOption(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const category = await adminService.createProductCategoryOption(
+      validatedBody<AdminCreateCategoryOptionBody>(req),
+    );
+    res.status(201).json({ category });
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function updateProductCategoryOption(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const id = requestId(req);
+    const category = await adminService.updateProductCategoryOption(
+      id,
+      validatedBody<AdminUpdateCategoryOptionBody>(req),
+    );
+    res.json({ category });
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function deleteProductCategoryOption(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const id = requestId(req);
+    await adminService.deleteProductCategoryOption(id);
+    res.status(204).end();
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function listCurrencyOptions(
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const result = await adminService.listCurrencyOptions();
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function createCurrencyOption(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const currency = await adminService.createCurrencyOption(
+      validatedBody<AdminCreateCurrencyOptionBody>(req),
+    );
+    res.status(201).json({ currency });
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function updateCurrencyOption(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { code } = req.params as unknown as AdminCurrencyCodeParams;
+    const currency = await adminService.updateCurrencyOption(
+      code,
+      validatedBody<AdminUpdateCurrencyOptionBody>(req),
+    );
+    res.json({ currency });
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function deleteCurrencyOption(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { code } = req.params as unknown as AdminCurrencyCodeParams;
+    await adminService.deleteCurrencyOption(code);
+    res.status(204).end();
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function uploadImages(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const files = Array.isArray(req.files) ? req.files : [];
+    const images = await uploadAdminImages(files);
+    res.status(201).json({ images });
+  } catch (e) {
+    next(e);
+  }
+}
+
 export async function listProducts(
   req: Request,
   res: Response,
@@ -149,6 +287,8 @@ export async function updateProduct(
     const product = await adminService.updateProduct(
       id,
       validatedBody<AdminUpdateProductBody>(req),
+      req.user?.id,
+      req.user?.role,
     );
     res.json({ product });
   } catch (e) {
@@ -163,7 +303,7 @@ export async function deleteProduct(
 ) {
   try {
     const id = requestId(req);
-    await adminService.deleteProduct(id);
+    await adminService.deleteProduct(id, req.user?.id, req.user?.role);
     res.status(204).end();
   } catch (e) {
     next(e);
@@ -272,6 +412,8 @@ export async function updateVoucher(
     const voucher = await adminService.updateVoucher(
       id,
       validatedBody<AdminUpdateVoucherBody>(req),
+      req.user?.id,
+      req.user?.role,
     );
     res.json({ voucher });
   } catch (e) {
@@ -286,7 +428,7 @@ export async function deleteVoucher(
 ) {
   try {
     const id = requestId(req);
-    await adminService.deleteVoucher(id);
+    await adminService.deleteVoucher(id, req.user?.id, req.user?.role);
     res.status(204).end();
   } catch (e) {
     next(e);

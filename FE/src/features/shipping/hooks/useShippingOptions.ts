@@ -47,7 +47,6 @@ export function useShippingOptions(input: UseShippingOptionsInput) {
 
   useEffect(() => {
     if (!requestKey) {
-      setData(EMPTY);
       return;
     }
 

@@ -14,6 +14,11 @@ export const registerSchema = z
     firstName: z.string().trim(),
     lastName: z.string().trim(),
     dateOfBirth: z.string(),
+    phone: z
+      .string()
+      .trim()
+      .min(1, "Phone number is required")
+      .max(32, "Phone number is too long"),
     email: z
       .string()
       .trim()

@@ -13,11 +13,17 @@ import {
   sendOrderConfirmationEmail,
   shouldSendOrderConfirmationEmail,
 } from "@/models/orders/order-confirmation.email";
+import { createDashboardNotification } from "@/models/notifications/notifications.service";
 
 function generateOrderCode(): string {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const suffix = randomBytes(3).toString("hex").toUpperCase();
   return `GS-${date}-${suffix}`;
+}
+
+function isBankTransferPayment(method?: string): boolean {
+  const normalized = method?.trim().toLowerCase();
+  return normalized === "bank" || normalized === "bank_transfer";
 }
 
 export interface CheckoutUser {
@@ -169,12 +175,16 @@ export async function createOrder(
   const user = await resolveCheckoutUser(email);
   const checkoutResult = await validateCheckoutForOrder(user, body);
   const orderCode = generateOrderCode();
+  const defaultIsPay = isBankTransferPayment(body.paymentMethod);
+  const defaultStatus: OrderStatus = defaultIsPay ? "shipping" : "pending";
+  const orderStatus = options?.status ?? defaultStatus;
+  const isPay = options?.isPay ?? defaultIsPay;
 
   const order = await ordersRepo.createOrder({
     orderCode,
     userEmail: email,
-    status: options?.status ?? "pending",
-    isPay: options?.isPay ?? false,
+    status: orderStatus,
+    isPay,
     momoOrderId: options?.momoOrderId,
     vnpTxnRef: options?.vnpTxnRef,
     items: body.items,
@@ -210,7 +220,22 @@ export async function createOrder(
     );
   }
 
-  const orderStatus = (options?.status ?? "pending") as OrderStatus;
+  void createDashboardNotification({
+    type: "order_created",
+    title: "Đơn hàng mới",
+    message: `${user.name || user.email} vừa tạo đơn ${order.orderCode}`,
+    metadata: {
+      orderCode: order.orderCode,
+      userEmail: user.email,
+      total: body.total,
+      status: orderStatus,
+    },
+  }).catch((err) => {
+    console.error(
+      `[notifications] Failed to create order notification for ${order.orderCode}:`,
+      err,
+    );
+  });
 
   void notifyOrderConfirmationEmail(
     user,

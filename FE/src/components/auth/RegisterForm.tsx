@@ -46,6 +46,7 @@ export function RegisterForm() {
       firstName: "",
       lastName: "",
       dateOfBirth: "",
+      phone: "",
       marketingOptIn: false,
     },
   });
@@ -62,6 +63,7 @@ export function RegisterForm() {
         email,
         password: values.password,
         name,
+        phone: values.phone.trim(),
       });
       setRegisteredEmail(email);
       setVerificationMessage(res.verificationUrl ?? res.message);
@@ -202,6 +204,7 @@ export function RegisterForm() {
           endAdornment={
             <button
               type="button"
+              tabIndex={-1}
               onClick={openDatePicker}
               className="text-store-fg-muted hover:text-store-ink"
               aria-label="Choose date of birth"
@@ -209,6 +212,15 @@ export function RegisterForm() {
               <Calendar className="size-5" strokeWidth={1.5} />
             </button>
           }
+        />
+
+        <AuthFloatingInput
+          id="register-phone"
+          label="Phone number*"
+          type="tel"
+          autoComplete="tel"
+          error={errors.phone?.message}
+          {...register("phone")}
         />
 
         <AuthFloatingInput
@@ -230,6 +242,7 @@ export function RegisterForm() {
           endAdornment={
             <button
               type="button"
+              tabIndex={-1}
               onClick={() => setShowPassword((v) => !v)}
               className="text-store-fg-muted hover:text-store-ink"
               aria-label={showPassword ? "Hide password" : "Show password"}
@@ -253,6 +266,7 @@ export function RegisterForm() {
           endAdornment={
             <button
               type="button"
+              tabIndex={-1}
               onClick={() => setShowPassword((v) => !v)}
               className="text-store-fg-muted hover:text-store-ink"
               aria-label={showPassword ? "Hide password" : "Show password"}

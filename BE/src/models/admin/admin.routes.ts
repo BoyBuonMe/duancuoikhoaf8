@@ -6,16 +6,26 @@ import {
 } from "@/middlewares/auth.middleware";
 import { validate } from "@/middlewares/validate.middleware";
 import * as adminController from "@/models/admin/admin.controller";
+import * as notificationsController from "@/models/notifications/notifications.controller";
 import {
+  adminImageUpload,
+  handleAdminImageUploadError,
+} from "@/models/admin/admin.upload";
+import {
+  adminCreateCategoryOptionBodySchema,
+  adminCreateCurrencyOptionBodySchema,
   adminCreateProductBodySchema,
   adminCreateVariantBodySchema,
   adminCreateVoucherBodySchema,
+  adminCurrencyCodeParamsSchema,
   adminIdParamsSchema,
   adminListOrdersQuerySchema,
   adminListProductsQuerySchema,
   adminListUsersQuerySchema,
   adminListVouchersQuerySchema,
   adminOrderCodeParamsSchema,
+  adminUpdateCategoryOptionBodySchema,
+  adminUpdateCurrencyOptionBodySchema,
   adminUpdateOrderStatusBodySchema,
   adminUpdateProductBodySchema,
   adminUpdateUserBodySchema,
@@ -26,6 +36,16 @@ import {
 const router = Router();
 
 router.use(requireAuth, requireAdmin);
+
+router.get("/notifications", notificationsController.listNotifications);
+router.patch(
+  "/notifications/read-all",
+  notificationsController.markAllRead,
+);
+router.patch(
+  "/notifications/:id/read",
+  notificationsController.markRead,
+);
 
 router.get(
   "/users",
@@ -51,6 +71,52 @@ router.delete(
 );
 
 router.get(
+  "/product-category-options",
+  adminController.listProductCategoryOptions,
+);
+router.post(
+  "/product-category-options",
+  validate(adminCreateCategoryOptionBodySchema),
+  adminController.createProductCategoryOption,
+);
+router.patch(
+  "/product-category-options/:id",
+  validate(adminIdParamsSchema, "params"),
+  validate(adminUpdateCategoryOptionBodySchema),
+  adminController.updateProductCategoryOption,
+);
+router.delete(
+  "/product-category-options/:id",
+  validate(adminIdParamsSchema, "params"),
+  adminController.deleteProductCategoryOption,
+);
+
+router.get("/currency-options", adminController.listCurrencyOptions);
+router.post(
+  "/currency-options",
+  validate(adminCreateCurrencyOptionBodySchema),
+  adminController.createCurrencyOption,
+);
+router.patch(
+  "/currency-options/:code",
+  validate(adminCurrencyCodeParamsSchema, "params"),
+  validate(adminUpdateCurrencyOptionBodySchema),
+  adminController.updateCurrencyOption,
+);
+router.delete(
+  "/currency-options/:code",
+  validate(adminCurrencyCodeParamsSchema, "params"),
+  adminController.deleteCurrencyOption,
+);
+
+router.post(
+  "/uploads/images",
+  adminImageUpload.array("images", 8),
+  handleAdminImageUploadError,
+  adminController.uploadImages,
+);
+
+router.get(
   "/orders",
   validate(adminListOrdersQuerySchema, "query"),
   adminController.listOrders,
@@ -69,7 +135,6 @@ router.get(
 
 router.get(
   "/products",
-  requireBoss,
   validate(adminListProductsQuerySchema, "query"),
   adminController.listProducts,
 );
@@ -81,7 +146,6 @@ router.post(
 );
 router.get(
   "/products/:id",
-  requireBoss,
   validate(adminIdParamsSchema, "params"),
   adminController.getProduct,
 );

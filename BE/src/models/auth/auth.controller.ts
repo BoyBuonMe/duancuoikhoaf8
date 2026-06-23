@@ -8,6 +8,7 @@ import {
   sendPasswordResetEmail,
   sendVerificationEmail,
 } from "@/models/auth/email.service";
+import { createDashboardNotification } from "@/models/notifications/notifications.service";
 import {
   signAccessToken,
   signRefreshToken,
@@ -26,6 +27,7 @@ import type {
 } from "@/models/auth/auth.validation";
 
 const REFRESH_COOKIE = "refreshToken";
+const AUTH_SESSION_COOKIE = "authSession";
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const EMAIL_VERIFICATION_TOKEN_BYTES = 32;
 const EMAIL_VERIFICATION_EXPIRES_MS = 24 * 60 * 60 * 1000;
@@ -47,6 +49,26 @@ function refreshCookieOptions(): CookieOptions {
   };
 }
 
+function authSessionCookieOptions(): CookieOptions {
+  return {
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: SEVEN_DAYS_MS,
+  };
+}
+
+function clearAuthCookies(res: Response): void {
+  res.clearCookie(REFRESH_COOKIE, {
+    ...refreshCookieOptions(),
+    maxAge: undefined,
+  });
+  res.clearCookie(AUTH_SESSION_COOKIE, {
+    ...authSessionCookieOptions(),
+    maxAge: undefined,
+  });
+}
+
 async function issueTokens(
   res: Response,
   payload: JwtPayload,
@@ -54,6 +76,7 @@ async function issueTokens(
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
   res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
+  res.cookie(AUTH_SESSION_COOKIE, "1", authSessionCookieOptions());
 
   await RefreshToken.create({
     tokenHash: hashResetToken(refreshToken),
@@ -135,8 +158,22 @@ async function issueEmailVerification(user: {
   return { verificationToken, verificationUrl };
 }
 
-function authUser(user: { id: string; email: string; name?: string }) {
-  return { id: user.id, email: user.email, name: user.name };
+function authUser(user: {
+  id: string;
+  email: string;
+  name?: string;
+  role?: "user" | "admin" | "boss";
+  status?: "active" | "blocked";
+  emailVerified?: boolean;
+}) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    status: user.status,
+    emailVerified: user.emailVerified,
+  };
 }
 
 export async function register(
@@ -145,7 +182,7 @@ export async function register(
   next: NextFunction,
 ) {
   try {
-    const { email, password, name } = req.body as RegisterBody;
+    const { email, password, name, phone } = req.body as RegisterBody;
 
     const exists = await User.findOne({ email });
     if (exists) {
@@ -157,8 +194,25 @@ export async function register(
       email,
       passwordHash,
       name,
+      phone,
       authProvider: "local",
       emailVerified: false,
+    });
+
+    void createDashboardNotification({
+      type: "user_registered",
+      title: "Người dùng mới đăng ký",
+      message: `${user.email} vừa đăng ký tài khoản`,
+      metadata: {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    }).catch((err) => {
+      console.error(
+        `[notifications] Failed to create registration notification for ${user.email}:`,
+        err,
+      );
     });
 
     const devVerification = await issueEmailVerification(user);
@@ -189,6 +243,10 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       throw httpError("Invalid credentials", 401);
     }
 
+    if (user.status === "blocked") {
+      throw httpError("Account is blocked", 403);
+    }
+
     if (!user.emailVerified) {
       throw httpError(
         "Please verify your email before logging in",
@@ -197,7 +255,11 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       );
     }
 
-    const token = await issueTokens(res, { sub: user.id, email: user.email });
+    const token = await issueTokens(res, {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
     res.json({
       token,
       user: authUser(user),
@@ -262,7 +324,15 @@ export async function google(req: Request, res: Response, next: NextFunction) {
 
     if (!user) throw httpError("Unable to sign in with Google", 500);
 
-    const token = await issueTokens(res, { sub: user.id, email: user.email });
+    if (user.status === "blocked") {
+      throw httpError("Account is blocked", 403);
+    }
+
+    const token = await issueTokens(res, {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
     res.json({ token, user: authUser(user) });
   } catch (e) {
     next(e);
@@ -281,6 +351,7 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
       .cookies;
     const token = cookies?.[REFRESH_COOKIE];
     if (!token) {
+      clearAuthCookies(res);
       throw httpError("Refresh token missing", 401);
     }
 
@@ -288,6 +359,7 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
     try {
       payload = verifyRefreshToken(token);
     } catch {
+      clearAuthCookies(res);
       throw httpError("Invalid or expired refresh token", 401);
     }
 
@@ -297,14 +369,21 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
     });
     if (!stored) {
       // Token đã bị revoke hoặc không hợp lệ — xoá cookie
-      res.clearCookie(REFRESH_COOKIE, refreshCookieOptions());
+      clearAuthCookies(res);
       throw httpError("Refresh token revoked", 401);
     }
 
     // Rotation: issue hoàn toàn token mới
+    const user = await User.findById(payload.sub).select("email role status");
+    if (!user || user.status === "blocked") {
+      clearAuthCookies(res);
+      throw httpError("Unauthorized", 401);
+    }
+
     const accessToken = await issueTokens(res, {
       sub: payload.sub,
-      email: payload.email,
+      email: user.email,
+      role: user.role,
     });
     res.json({ token: accessToken });
   } catch (e) {
@@ -327,10 +406,7 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
       await RefreshToken.deleteOne({ tokenHash: hashResetToken(token) });
     }
 
-    res.clearCookie(REFRESH_COOKIE, {
-      ...refreshCookieOptions(),
-      maxAge: undefined,
-    });
+    clearAuthCookies(res);
     res.status(204).end();
   } catch (e) {
     next(e);
@@ -481,6 +557,7 @@ export async function resetPassword(
         },
       },
     );
+    await RefreshToken.deleteMany({ userId: user._id });
 
     res.json({ message: "Password has been reset." });
   } catch (e) {

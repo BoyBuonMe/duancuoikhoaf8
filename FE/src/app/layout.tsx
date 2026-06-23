@@ -35,11 +35,11 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full overflow-x-clip antialiased`}
       suppressHydrationWarning={true}
     >
       <body
-        className="min-h-full flex flex-col bg-background text-foreground"
+        className="min-h-full flex flex-col overflow-x-clip bg-background text-foreground"
         suppressHydrationWarning={true}
       >
         <ThemeScript />

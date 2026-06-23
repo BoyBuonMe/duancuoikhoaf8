@@ -2,10 +2,16 @@ import { isValidObjectId } from "mongoose";
 import User, { type UserRole } from "@/models/users/User.model";
 import Product from "@/models/products/Product.model";
 import ProductVariant from "@/models/products/ProductVariant.model";
+import Category from "@/models/categories/Category.model";
+import CurrencyOption from "@/models/currencies/CurrencyOption.model";
 import Voucher from "@/models/vouchers/Voucher.model";
 import Order from "@/models/orders/Order.model";
+import { createDashboardNotification } from "@/models/notifications/notifications.service";
 import { httpError } from "@/utils/http-error";
+import { pathSegmentsToProductTags } from "@/models/products/product-categories";
 import type {
+  AdminCreateCategoryOptionBody,
+  AdminCreateCurrencyOptionBody,
   AdminCreateVoucherBody,
   AdminCreateProductBody,
   AdminCreateVariantBody,
@@ -13,6 +19,8 @@ import type {
   AdminListVouchersQuery,
   AdminListProductsQuery,
   AdminListUsersQuery,
+  AdminUpdateCategoryOptionBody,
+  AdminUpdateCurrencyOptionBody,
   AdminUpdateVoucherBody,
   AdminUpdateProductBody,
   AdminUpdateOrderStatusBody,
@@ -28,6 +36,108 @@ function assertObjectId(id: string) {
   if (!isValidObjectId(id)) {
     throw httpError("Invalid id", 400);
   }
+}
+
+async function ensureDefaultCurrencyOption() {
+  await CurrencyOption.updateOne(
+    { code: "USD" },
+    { $setOnInsert: { code: "USD" } },
+    { upsert: true },
+  );
+}
+
+function slugify(value: string, fallback: string) {
+  const slug = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug || fallback;
+}
+
+function startsWithSegments(segments: string[], prefix: string[]) {
+  return prefix.every((segment, index) => segments[index] === segment);
+}
+
+function categoryTagsQuery(tags: string[]) {
+  if (!tags.length) return null;
+  return {
+    $and: tags.map((tag) => ({
+      categories: new RegExp(`^${escapeRegex(tag)}$`, "i"),
+    })),
+  };
+}
+
+async function generateUniqueCategorySlug(name: string, parentSlug?: string) {
+  const baseName = slugify(name, "category");
+  const base = parentSlug ? `${parentSlug}-${baseName}` : baseName;
+  let candidate = base;
+  let suffix = 2;
+
+  while (await Category.exists({ slug: candidate })) {
+    candidate = `${base}-${suffix++}`;
+  }
+
+  return candidate;
+}
+
+async function generateUniqueProductSourceUrl(title: string) {
+  const base = slugify(title, "product");
+  let candidate = base;
+  let suffix = 2;
+
+  while (await Product.exists({ sourceUrl: `/products/${candidate}` })) {
+    candidate = `${base}-${suffix++}`;
+  }
+
+  return `/products/${candidate}`;
+}
+
+async function refreshProductCounts() {
+  const categories = await Category.find().lean();
+
+  await Promise.all(
+    categories.map(async (category) => {
+      const subtreeSlugs = categories
+        .filter((candidate) =>
+          startsWithSegments(candidate.pathSegments, category.pathSegments),
+        )
+        .map((candidate) => candidate.slug);
+      const tags = pathSegmentsToProductTags(category.pathSegments);
+      const queries: Record<string, unknown>[] = [];
+
+      if (subtreeSlugs.length) {
+        queries.push({ categorySlugs: { $in: subtreeSlugs } });
+      }
+
+      const legacyQuery = categoryTagsQuery(tags);
+      if (legacyQuery) queries.push(legacyQuery);
+
+      const query =
+        queries.length === 0
+          ? {}
+          : queries.length === 1
+            ? queries[0]
+            : { $or: queries };
+      const productCount = await Product.countDocuments(query);
+
+      await Category.updateOne(
+        { _id: category._id },
+        { $set: { productCount } },
+      );
+    }),
+  );
+}
+
+async function countCurrencyUsage(code: string) {
+  const [products, variants] = await Promise.all([
+    Product.countDocuments({ "price.currency": code }),
+    ProductVariant.countDocuments({ "price.currency": code }),
+  ]);
+
+  return products + variants;
 }
 
 export async function listUsers(queryParams: AdminListUsersQuery) {
@@ -78,17 +188,22 @@ export async function updateUser(
 ) {
   assertObjectId(id);
 
-  const targetUser = await User.findById(id).select("role").lean();
+  const targetUser = await User.findById(id)
+    .select("email name phone role status emailVerified")
+    .lean();
   if (!targetUser) throw httpError("User not found", 404);
 
   if (currentUserRole !== "boss") {
+    if (targetUser.role === "boss") {
+      throw httpError("Boss access required", 403);
+    }
+
     const onlyUpdatesRole =
       Object.keys(body).length === 1 &&
-      typeof body.role === "string" &&
-      body.role !== "boss";
+      (body.role === "user" || body.role === "admin");
 
-    if (!onlyUpdatesRole || targetUser.role === "boss") {
-      throw httpError("Boss access required", 403);
+    if (!onlyUpdatesRole) {
+      throw httpError("Admin can only change role to user or admin", 403);
     }
   }
 
@@ -107,6 +222,33 @@ export async function updateUser(
     .lean();
   if (!user) throw httpError("User not found", 404);
 
+  const changedFields = Object.entries(body)
+    .filter(([key, value]) => {
+      const previous = targetUser[key as keyof typeof targetUser];
+      return String(previous ?? "") !== String(value ?? "");
+    })
+    .map(([key]) => key);
+
+  if (changedFields.length > 0) {
+    void createDashboardNotification({
+      type: "user_updated",
+      title: "Người dùng đã được chỉnh sửa",
+      message: `${user.email} vừa được cập nhật bởi ${currentUserRole ?? "admin"}`,
+      metadata: {
+        actorId: currentUserId,
+        actorRole: currentUserRole,
+        targetUserId: String(user._id),
+        targetEmail: user.email,
+        changedFields,
+      },
+    }).catch((err) => {
+      console.error(
+        `[notifications] Failed to create user update notification for ${user.email}:`,
+        err,
+      );
+    });
+  }
+
   return user;
 }
 
@@ -119,6 +261,216 @@ export async function deleteUser(id: string, currentUserId?: string) {
 
   const user = await User.findByIdAndDelete(id).lean();
   if (!user) throw httpError("User not found", 404);
+}
+
+export async function listProductCategoryOptions() {
+  const categories = await Category.find()
+    .sort({ level: 1, path: 1, name: 1 })
+    .lean();
+
+  return { categories, count: categories.length };
+}
+
+export async function createProductCategoryOption(
+  body: AdminCreateCategoryOptionBody,
+) {
+  const parentSlug = body.parentSlug ?? null;
+  const parent = parentSlug
+    ? await Category.findOne({ slug: parentSlug }).lean()
+    : null;
+
+  if (parentSlug && !parent) {
+    throw httpError("Parent category not found", 404);
+  }
+
+  const pathSegments = parent
+    ? [...parent.pathSegments, body.name]
+    : [body.name];
+  const slug = await generateUniqueCategorySlug(body.name, parent?.slug);
+
+  return Category.create({
+    name: body.name,
+    slug,
+    level: parent ? parent.level + 1 : 0,
+    parentSlug,
+    path: pathSegments.join(" > "),
+    pathSegments,
+    productCount: 0,
+  });
+}
+
+export async function updateProductCategoryOption(
+  id: string,
+  body: AdminUpdateCategoryOptionBody,
+) {
+  assertObjectId(id);
+
+  const category = await Category.findById(id).lean();
+  if (!category) throw httpError("Category not found", 404);
+
+  const oldSegments = category.pathSegments;
+  const nextSegments = [...oldSegments.slice(0, -1), body.name];
+
+  await Category.updateOne(
+    { _id: category._id },
+    {
+      $set: {
+        name: body.name,
+        path: nextSegments.join(" > "),
+        pathSegments: nextSegments,
+      },
+    },
+  );
+
+  const descendantQuery = {
+    _id: { $ne: category._id },
+    level: { $gt: category.level },
+    ...Object.fromEntries(
+      oldSegments.map((segment, index) => [`pathSegments.${index}`, segment]),
+    ),
+  };
+  const descendants = await Category.find(descendantQuery).lean();
+
+  await Promise.all(
+    descendants.map((descendant) => {
+      const descendantSegments = [
+        ...nextSegments,
+        ...descendant.pathSegments.slice(oldSegments.length),
+      ];
+
+      return Category.updateOne(
+        { _id: descendant._id },
+        {
+          $set: {
+            path: descendantSegments.join(" > "),
+            pathSegments: descendantSegments,
+          },
+        },
+      );
+    }),
+  );
+
+  await refreshProductCounts();
+
+  return Category.findById(id).lean();
+}
+
+export async function deleteProductCategoryOption(id: string) {
+  assertObjectId(id);
+
+  const category = await Category.findById(id).lean();
+  if (!category) throw httpError("Category not found", 404);
+
+  const [childCount, productsUsingCategory] = await Promise.all([
+    Category.countDocuments({ parentSlug: category.slug }),
+    Product.countDocuments({ categorySlugs: category.slug }),
+  ]);
+
+  if (childCount > 0) {
+    throw httpError("Cannot delete a category that has child categories", 409);
+  }
+  if (category.productCount > 0 || productsUsingCategory > 0) {
+    throw httpError("Cannot delete a category that is used by products", 409);
+  }
+
+  await Category.deleteOne({ _id: category._id });
+  await refreshProductCounts();
+}
+
+export async function listCurrencyOptions() {
+  await ensureDefaultCurrencyOption();
+  const currencies = await CurrencyOption.find().sort({ code: 1 }).lean();
+  return { currencies, count: currencies.length };
+}
+
+export async function createCurrencyOption(body: AdminCreateCurrencyOptionBody) {
+  await ensureDefaultCurrencyOption();
+
+  const existing = await CurrencyOption.findOne({ code: body.code }).lean();
+  if (existing) throw httpError("Currency code already exists", 409);
+
+  return CurrencyOption.create({ code: body.code });
+}
+
+export async function updateCurrencyOption(
+  code: string,
+  body: AdminUpdateCurrencyOptionBody,
+) {
+  await ensureDefaultCurrencyOption();
+
+  if (code === "USD") {
+    throw httpError("USD cannot be renamed", 400);
+  }
+
+  const currency = await CurrencyOption.findOne({ code }).lean();
+  if (!currency) throw httpError("Currency option not found", 404);
+
+  if (body.code === code) {
+    return currency;
+  }
+
+  const usageCount = await countCurrencyUsage(code);
+  if (usageCount > 0) {
+    throw httpError("Cannot rename a currency that is used by products", 409);
+  }
+
+  const existing = await CurrencyOption.findOne({ code: body.code }).lean();
+  if (existing) throw httpError("Currency code already exists", 409);
+
+  return CurrencyOption.findOneAndUpdate(
+    { code },
+    { $set: { code: body.code } },
+    { new: true, runValidators: true },
+  ).lean();
+}
+
+export async function deleteCurrencyOption(code: string) {
+  await ensureDefaultCurrencyOption();
+
+  if (code === "USD") {
+    throw httpError("USD cannot be deleted", 400);
+  }
+
+  const currency = await CurrencyOption.findOne({ code }).lean();
+  if (!currency) throw httpError("Currency option not found", 404);
+
+  const usageCount = await countCurrencyUsage(code);
+  if (usageCount > 0) {
+    throw httpError("Cannot delete a currency that is used by products", 409);
+  }
+
+  await CurrencyOption.deleteOne({ code });
+}
+
+async function resolveProductCategoryPlacement(
+  categorySlugs: string[],
+  fallbackCategories: string[] = [],
+) {
+  const slugs = [...new Set(categorySlugs.map((slug) => slug.trim()))].filter(
+    Boolean,
+  );
+  if (!slugs.length) {
+    return { categorySlugs: [], categories: fallbackCategories };
+  }
+
+  const categoryDocs = await Category.find({ slug: { $in: slugs } }).lean();
+  const bySlug = new Map(categoryDocs.map((category) => [category.slug, category]));
+  const missingSlug = slugs.find((slug) => !bySlug.has(slug));
+  if (missingSlug) {
+    throw httpError(`Category not found: ${missingSlug}`, 400);
+  }
+
+  const categories = [
+    ...new Set(
+      slugs.flatMap((slug) => {
+        const category = bySlug.get(slug)!;
+        const tags = pathSegmentsToProductTags(category.pathSegments);
+        return tags.length ? tags : [category.name];
+      }),
+    ),
+  ];
+
+  return { categorySlugs: slugs, categories };
 }
 
 export async function listProducts(queryParams: AdminListProductsQuery) {
@@ -155,23 +507,77 @@ export async function getProduct(id: string) {
 }
 
 export async function createProduct(body: AdminCreateProductBody) {
-  return Product.create(body);
-}
+  const placement = await resolveProductCategoryPlacement(
+    body.categorySlugs,
+    body.categories,
+  );
 
-export async function updateProduct(id: string, body: AdminUpdateProductBody) {
-  assertObjectId(id);
+  const product = await Product.create({
+    ...body,
+    sourceUrl: body.sourceUrl ?? (await generateUniqueProductSourceUrl(body.title)),
+    ...placement,
+  });
 
-  const product = await Product.findByIdAndUpdate(
-    id,
-    { $set: body },
-    { new: true, runValidators: true },
-  ).lean();
-  if (!product) throw httpError("Product not found", 404);
+  await refreshProductCounts();
 
   return product;
 }
 
-export async function deleteProduct(id: string) {
+export async function updateProduct(
+  id: string,
+  body: AdminUpdateProductBody,
+  actorId?: string,
+  actorRole?: UserRole,
+) {
+  assertObjectId(id);
+
+  const before = await Product.findById(id).select("title sourceUrl").lean();
+  if (!before) throw httpError("Product not found", 404);
+
+  const updateBody = { ...body };
+  if (Array.isArray(body.categorySlugs)) {
+    const placement = await resolveProductCategoryPlacement(
+      body.categorySlugs,
+      body.categories,
+    );
+    updateBody.categorySlugs = placement.categorySlugs;
+    updateBody.categories = placement.categories;
+  }
+
+  const product = await Product.findByIdAndUpdate(
+    id,
+    { $set: updateBody },
+    { new: true, runValidators: true },
+  ).lean();
+  if (!product) throw httpError("Product not found", 404);
+
+  void createDashboardNotification({
+    type: "product_updated",
+    title: "Sản phẩm đã được chỉnh sửa",
+    message: `${product.title || before.title || "Sản phẩm"} vừa được cập nhật`,
+    metadata: {
+      actorId,
+      actorRole,
+      productId: String(product._id),
+      productTitle: product.title,
+      sourceUrl: product.sourceUrl,
+      changedFields: Object.keys(body),
+    },
+  }).catch((err) => {
+    console.error(
+      `[notifications] Failed to create product update notification for ${product._id}:`,
+      err,
+    );
+  });
+
+  return product;
+}
+
+export async function deleteProduct(
+  id: string,
+  actorId?: string,
+  actorRole?: UserRole,
+) {
   assertObjectId(id);
 
   const product = await Product.findByIdAndDelete(id);
@@ -179,6 +585,24 @@ export async function deleteProduct(id: string) {
 
   await ProductVariant.deleteMany({
     productSourceUrl: product.sourceUrl,
+  });
+
+  void createDashboardNotification({
+    type: "product_deleted",
+    title: "Sản phẩm đã bị xóa",
+    message: `${product.title || "Sản phẩm"} vừa bị xóa khỏi hệ thống`,
+    metadata: {
+      actorId,
+      actorRole,
+      productId: String(product._id),
+      productTitle: product.title,
+      sourceUrl: product.sourceUrl,
+    },
+  }).catch((err) => {
+    console.error(
+      `[notifications] Failed to create product delete notification for ${product._id}:`,
+      err,
+    );
   });
 }
 
@@ -256,7 +680,12 @@ export async function createVoucher(body: AdminCreateVoucherBody) {
   return Voucher.create(body);
 }
 
-export async function updateVoucher(id: string, body: AdminUpdateVoucherBody) {
+export async function updateVoucher(
+  id: string,
+  body: AdminUpdateVoucherBody,
+  actorId?: string,
+  actorRole?: UserRole,
+) {
   assertObjectId(id);
 
   if (body.code) {
@@ -278,14 +707,53 @@ export async function updateVoucher(id: string, body: AdminUpdateVoucherBody) {
   ).lean();
   if (!voucher) throw httpError("Voucher not found", 404);
 
+  void createDashboardNotification({
+    type: "voucher_updated",
+    title: "Voucher đã được chỉnh sửa",
+    message: `Voucher ${voucher.code} vừa được cập nhật`,
+    metadata: {
+      actorId,
+      actorRole,
+      voucherId: String(voucher._id),
+      voucherCode: voucher.code,
+      changedFields: Object.keys(body),
+    },
+  }).catch((err) => {
+    console.error(
+      `[notifications] Failed to create voucher update notification for ${voucher._id}:`,
+      err,
+    );
+  });
+
   return voucher;
 }
 
-export async function deleteVoucher(id: string) {
+export async function deleteVoucher(
+  id: string,
+  actorId?: string,
+  actorRole?: UserRole,
+) {
   assertObjectId(id);
 
   const voucher = await Voucher.findByIdAndDelete(id).lean();
   if (!voucher) throw httpError("Voucher not found", 404);
+
+  void createDashboardNotification({
+    type: "voucher_deleted",
+    title: "Voucher đã bị xóa",
+    message: `Voucher ${voucher.code} vừa bị xóa khỏi hệ thống`,
+    metadata: {
+      actorId,
+      actorRole,
+      voucherId: String(voucher._id),
+      voucherCode: voucher.code,
+    },
+  }).catch((err) => {
+    console.error(
+      `[notifications] Failed to create voucher delete notification for ${voucher._id}:`,
+      err,
+    );
+  });
 }
 
 export async function listOrders(queryParams: AdminListOrdersQuery) {

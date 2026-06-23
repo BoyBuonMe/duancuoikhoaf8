@@ -56,6 +56,21 @@ function buildCategoryQuery(categoryFilters: string[]) {
   };
 }
 
+function buildCategoryPlacementQuery(
+  categorySlugs: string[],
+  categoryFilters: string[],
+) {
+  const slugQuery = categorySlugs.length
+    ? { categorySlugs: { $in: categorySlugs } }
+    : null;
+  const legacyQuery = categoryFilters.length
+    ? buildCategoryQuery(categoryFilters)
+    : null;
+
+  if (slugQuery && legacyQuery) return { $or: [slugQuery, legacyQuery] };
+  return slugQuery ?? legacyQuery ?? {};
+}
+
 export async function findProductsByCategories(
   categoryFilters: string[],
   limit: number,
@@ -71,6 +86,28 @@ export async function findProductsByCategories(
 
 export async function countProductsByCategories(categoryFilters: string[]) {
   const query = buildCategoryQuery(categoryFilters);
+  return Product.countDocuments(query);
+}
+
+export async function findProductsByCategoryPlacement(
+  categorySlugs: string[],
+  categoryFilters: string[],
+  limit: number,
+  skip: number,
+) {
+  const query = buildCategoryPlacementQuery(categorySlugs, categoryFilters);
+  return Product.find(query)
+    .sort({ scrapedAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+}
+
+export async function countProductsByCategoryPlacement(
+  categorySlugs: string[],
+  categoryFilters: string[],
+) {
+  const query = buildCategoryPlacementQuery(categorySlugs, categoryFilters);
   return Product.countDocuments(query);
 }
 
@@ -95,11 +132,16 @@ export async function findProductBySourceUrl(sourceUrl: string) {
 
 /**
  * Find a product by its URL slug (the path after /products/ in the sourceUrl).
- * Reconstructs the full Gymshark sourceUrl to do the lookup.
+ * Supports scraped Gymshark URLs and admin-created internal product URLs.
  */
 export async function findProductBySlug(slug: string) {
-  const sourceUrl = `https://www.gymshark.com/products/${slug}`;
-  return Product.findOne({ sourceUrl }).lean();
+  return Product.findOne({
+    $or: [
+      { sourceUrl: `https://www.gymshark.com/products/${slug}` },
+      { sourceUrl: `/products/${slug}` },
+      { sourceUrl: slug },
+    ],
+  }).lean();
 }
 
 export async function findVariantBySku(sku: string) {

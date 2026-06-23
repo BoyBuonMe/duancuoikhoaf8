@@ -12,6 +12,8 @@ import discountCodesRoutes from "@/models/discount-codes/discount-codes.routes";
 import shippingRoutes from "@/models/shipping/shipping.routes";
 import paymentsRoutes from "@/models/payments/payments.routes";
 import adminRoutes from "@/models/admin/admin.routes";
+import chatRoutes from "@/models/chat/chat.routes";
+import broadcastingRoutes from "@/models/chat/broadcasting.routes";
 
 const router = Router();
 
@@ -27,6 +29,8 @@ router.use("/vouchers", vouchersRoutes);
 router.use("/discount-codes", discountCodesRoutes);
 router.use("/shipping", shippingRoutes);
 router.use("/payments", paymentsRoutes);
+router.use("/chat", chatRoutes);
+router.use("/broadcasting", broadcastingRoutes);
 router.use("/admin", adminRoutes);
 
 export default router;
