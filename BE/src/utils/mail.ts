@@ -30,7 +30,18 @@ export function createMailTransporter() {
           pass: process.env.SMTP_PASS,
         }
       : undefined,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
+}
+
+export async function verifyMailTransporter(): Promise<void> {
+  if (!hasSmtpConfig()) return;
+
+  const transporter = createMailTransporter();
+  await transporter.verify();
+  console.info("[mail] SMTP connection verified successfully");
 }
 
 export async function sendMailMessage(options: {
